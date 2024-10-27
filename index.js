@@ -25,7 +25,14 @@ app.use(cookieParser())
 
 app.get('/ics/:id', async (req, res) => {
     console.info('Updating Calendar')
-    const untisAccess = await UntisAccess.findOne({where: {urlId: req.params.id}, include: [ PublicUntisAccess, PrivateUnitsAccess ] })
+    const untisAccess = await UntisAccess.findOne({where: {urlId: req.params.id}, include: [ PublicUntisAccess, PrivateUnitsAccess ]}).catch(err => {
+        console.error(`Error getting an UnitsAccess for UrlID: ${req.params.id}. Error: `, err)
+    })
+    if (!untisAccess) {
+        res.status(404).send(`Did not found UntisAccess for UrlID: ${req.params.id}`)
+        return
+    }
+    console.log('UntisAccess', untisAccess)
     const events = await getEvents(untisAccess)
     const {err, value} = ics.createEvents(events)
     if (err) {
