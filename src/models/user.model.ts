@@ -1,4 +1,4 @@
-const UserModel = (sequelize, Sequelize) => sequelize.define('users', {
+const UserModel = (sequelize: any, Sequelize: any) => sequelize.define('users', {
     userId: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
