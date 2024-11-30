@@ -1,14 +1,18 @@
-require('dotenv').config()
-const express = require('express')
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const ics = require('ics')
-const jwt = require('jsonwebtoken')
-const path = require('path')
-const db = require('./models')
-const {panelRoute, panelNewRoute, panelNewApiRoute, panelDeleteRoute, panelIdRoute} = require('./controllers/panel')
-const {getEvents} = require('./services/untis')
-const {logoutRoute, loginApiRoute, loginRoute, accountRoute, panelChangePasswordRoute, deleteAccountRoute} = require('./controllers/authentication')
+import 'dotenv/config'
+import express from 'express'
+import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import ics from 'ics'
+import jwt from 'jsonwebtoken'
+import path from 'path'
+import db from './models/index.js'
+import {panelRoute, panelNewRoute, panelNewApiRoute, panelDeleteRoute, panelIdRoute} from './controllers/panel.js'
+import {getEvents} from './services/untis.js'
+import {logoutRoute, loginApiRoute, loginRoute, accountRoute, panelChangePasswordRoute, deleteAccountRoute} from './controllers/authentication.js'
+
+import {fileURLToPath} from 'node:url'
+import {dirname} from 'node:path'
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const UntisAccess = db.untisAccess
 const PublicUntisAccess = db.publicUntisAccess

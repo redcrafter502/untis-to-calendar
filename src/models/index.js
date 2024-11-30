@@ -1,16 +1,17 @@
-const { Sequelize } = require('sequelize')
+import { Sequelize } from 'sequelize'
+import pg from 'pg'
 
-const UserModel = require('./user.model.js')
-const UntisAccessModel = require('./untisAccess.model.js')
-const PublicUntisAccessModel = require('./publicUntisAccess.model.js')
-const PrivateUntisAccessModel = require('./privateUntisAccess.model.js')
+import UserModel from './user.model.js'
+import UntisAccessModel from './untisAccess.model.js'
+import PublicUntisAccessModel from './publicUntisAccess.model.js'
+import PrivateUntisAccessModel from './privateUntisAccess.model.js'
 
 const sslRequired = (process.env.DB_SSL_REQUIRED === 'true')
 
 const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
-    dialectModule: require('pg'),
+    dialectModule: pg,
     dialectOptions: sslRequired ? {
       ssl: {
         //require: (process.env.DB_SSL_REQUIRED === 'true')
@@ -45,4 +46,4 @@ db.publicUntisAccess.belongsTo(db.untisAccess, { foreignKey: 'untisAccessId' })
 db.untisAccess.hasOne(db.privateUntisAccess, { foreignKey: 'untisAccessId', onDelete: 'CASCADE' })
 db.privateUntisAccess.belongsTo(db.untisAccess, { foreignKey: 'untisAccessId' })
 
-module.exports = db
+export default db

@@ -18,4 +18,4 @@ const PrivateUntisAccessModel = (sequelize, Sequelize) => sequelize.define('priv
     timestamps: false
 })
 
-module.exports = PrivateUntisAccessModel
+export default PrivateUntisAccessModel

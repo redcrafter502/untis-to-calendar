@@ -40,4 +40,4 @@ const UntisAccessModel = (sequelize, Sequelize) => sequelize.define('untisAccess
     }
 })
 
-module.exports = UntisAccessModel
+export default UntisAccessModel
