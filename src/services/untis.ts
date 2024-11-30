@@ -1,7 +1,7 @@
 import webuntis from 'webuntis'
 import momentTimezone from 'moment-timezone'
 
-const parseTime = (time) => {
+const parseTime = (time: number) => {
     const hour = Math.floor(time / 100)
     const minute = time % 100
     return [hour, minute]
@@ -21,7 +21,7 @@ const getCurrentAndNextWeekRange = () => {
     return { startOfCurrentWeek, endOfNextWeek }
 }
 
-export const getWebUntis = (untisAccess) => {
+export const getWebUntis = (untisAccess: any) => {
     if (untisAccess.type === 'public') {
         return new webuntis.WebUntisAnonymousAuth(untisAccess.school, untisAccess.domain)
     } else {
@@ -29,8 +29,8 @@ export const getWebUntis = (untisAccess) => {
     }
 }
 
-const getPublicTimetable = async (startOfCurrentWeek, endOfNextWeek, classId, untis) =>
-    await untis.getTimetableForRange(startOfCurrentWeek, endOfNextWeek, classId, webuntis.WebUntisElementType.CLASS).catch(async (err) => {
+const getPublicTimetable = async (startOfCurrentWeek: string | number | Date, endOfNextWeek: number | Date, classId: any, untis: webuntis.Base) =>
+    await untis.getTimetableForRange(<Date>startOfCurrentWeek, <Date>endOfNextWeek, classId, webuntis.WebUntisElementType.CLASS).catch(async (err) => {
         console.error('Timetable for range (or parts of it) not available', err)
         console.info('Now requesting each day individually from Untis')
         const returnTimetable = []
@@ -45,8 +45,8 @@ const getPublicTimetable = async (startOfCurrentWeek, endOfNextWeek, classId, un
         return returnTimetable
     })
 
-const getOwnTimetable = async (startOfCurrentWeek, endOfNextWeek, untis) =>
-    await untis.getOwnTimetableForRange(startOfCurrentWeek, endOfNextWeek).catch(async (err) => {
+const getOwnTimetable = async (startOfCurrentWeek: string | number | Date, endOfNextWeek: number | Date, untis: webuntis.Base) =>
+    await untis.getOwnTimetableForRange(<Date>startOfCurrentWeek, <Date>endOfNextWeek).catch(async (err) => {
         console.error('Timetable for range (or parts of it) not available', err)
         console.info('Now requesting each day individually from Untis')
         const returnTimetable = []
@@ -61,7 +61,7 @@ const getOwnTimetable = async (startOfCurrentWeek, endOfNextWeek, untis) =>
         return returnTimetable
     })
 
-const getTimetable = async (startOfCurrentWeek, endOfNextWeek, untisAccess, untis) => {
+const getTimetable = async (startOfCurrentWeek: Date, endOfNextWeek: Date, untisAccess: any, untis: webuntis.Base) => {
     if (untisAccess.type === 'public') {
         return await getPublicTimetable(startOfCurrentWeek, endOfNextWeek, untisAccess.publicUntisAccess.classId, untis)
     } else {
@@ -69,7 +69,7 @@ const getTimetable = async (startOfCurrentWeek, endOfNextWeek, untisAccess, unti
     }
 }
 
-export const getEvents = async (untisAccess) => {
+export const getEvents = async (untisAccess: any) => {
     const untis = getWebUntis(untisAccess)
     await untis.login().catch(err => {
         console.error('Login Error (getEvents)', err)
@@ -83,8 +83,9 @@ export const getEvents = async (untisAccess) => {
         teachers: [],
         lessons: []
     }
-    let examEvents = []
+    let examEvents: { start: number[]; startInputType: string; startOutputType: string; end: number[]; endInputType: string; endOutputType: string; title: string; description: string; location: string; status: string; busyStatus: string; transp: string; calName: any }[] = []
     if (untisAccess.type === 'private') {
+        // @ts-ignore
         homework = await untis.getHomeWorksFor(startOfCurrentWeek, endOfNextWeek)
 
         const { startDate, endDate } = await untis.getCurrentSchoolyear()
@@ -119,15 +120,22 @@ export const getEvents = async (untisAccess) => {
         })
     }
 
+    // @ts-ignore
     const events = timetable.map(lesson => {
-        const homeworks = []
+        const homeworks: string[] = []
         homework.homeworks.forEach(iHomework => {
+            // @ts-ignore
             const homeworkLesson = homework.lessons.filter(l => l.id === iHomework.lessonId)
+            // @ts-ignore
             const correctLesson = homeworkLesson[0].subject === `${lesson.su[0].longname} (${lesson.su[0].name})`
+            // @ts-ignore
             if (lesson.date === iHomework.date && correctLesson) {
+                // @ts-ignore
                 homeworks.push(`${iHomework.text} (Start)`)
             }
+            // @ts-ignore
             if (lesson.date === iHomework.dueDate && correctLesson) {
+                // @ts-ignore
                 homeworks.push(`${iHomework.text} (End)`)
             }
         })

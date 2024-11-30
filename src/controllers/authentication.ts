@@ -4,7 +4,8 @@ import db from '../models/index.js'
 
 const User = db.user
 
-export const loginRoute = (req, res) => {
+export const loginRoute = (req: any, res: any) => {
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, (err, _) => {
         if (err) {
             res.render('login')
@@ -14,7 +15,7 @@ export const loginRoute = (req, res) => {
     })
 }
 
-export const loginApiRoute = async (req, res) => {
+export const loginApiRoute = async (req: any, res: any) => {
     const user = await User.findOne({where: {email: req.body.email}})
     if (!user) {
         res.redirect('/login')
@@ -25,6 +26,7 @@ export const loginApiRoute = async (req, res) => {
         res.redirect('/login')
         return
     }
+    // @ts-ignore
     const token = jwt.sign({id: user.userId}, process.env.AUTH_SECRET, {
         expiresIn: 86400 // 24 hours
     })
@@ -36,28 +38,32 @@ export const loginApiRoute = async (req, res) => {
     res.redirect('/panel')
 }
 
-export const logoutRoute = (req, res) => {
+export const logoutRoute = (req: any, res: any) => {
     res.clearCookie('authSession')
     res.redirect('/')
 }
 
-export const accountRoute = (req, res) => {
+export const accountRoute = (req: any, res: any) => {
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
             return
         }
+        // @ts-ignore
         const user = await User.findByPk(decoded.id)
         res.render('account', { user })
     })
 }
 
-export const panelChangePasswordRoute = async (req, res) => {
+export const panelChangePasswordRoute = async (req: any, res: any) => {
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
             return
         }
+        // @ts-ignore
         const user = await User.findByPk(decoded.id)
         const oldPasswordIsValid = bcrypt.compareSync(req.body.oldPassword, user.password)
         if (!oldPasswordIsValid) {
@@ -74,12 +80,14 @@ export const panelChangePasswordRoute = async (req, res) => {
     })
 }
 
-export const deleteAccountRoute = (req, res)  => {
+export const deleteAccountRoute = (req: any, res: any)  => {
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
             return
         }
+        // @ts-ignore
         const user = await User.findByPk(decoded.id)
         await user.destroy()
         res.redirect('/logout')

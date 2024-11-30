@@ -7,18 +7,21 @@ const UntisAccess = db.untisAccess
 const PublicUntisAccess = db.publicUntisAccess
 const PrivateUnitsAccess = db.privateUntisAccess
 
-export const panelRoute = async (req, res) => {
+export const panelRoute = async (req: any, res: any) => {
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
             return
         }
+        // @ts-ignore
         const untisAccesses = await UntisAccess.findAll({where: {userId: decoded.id}})
         res.render('panel/index', { untisAccesses, apiURL: process.env.API_URL })
     })
 }
 
-export const panelNewRoute = async (req, res) => {
+export const panelNewRoute = async (req: any, res: any) => {
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, _) => {
         if (err) {
             res.redirect('/')
@@ -36,13 +39,14 @@ export const panelNewRoute = async (req, res) => {
         let classes = null
         if (type === 'public') {
             const untis = getWebUntis({ school, domain, type: 'public' })
-            await untis.login().catch(_ => {
+            await untis.login().catch(() => {
                 res.redirect('/panel')
             })
-            const schoolYear = await untis.getCurrentSchoolyear().catch(_ => {
+            const schoolYear = await untis.getCurrentSchoolyear().catch(() => {
                 res.redirect('/panel')
             })
-            classes = await untis.getClasses(true, schoolYear.id).catch(_ => {
+            // @ts-ignore
+            classes = await untis.getClasses(true, schoolYear.id).catch(() => {
                 res.redirect('/panel')
             })
             await untis.logout()
@@ -51,7 +55,8 @@ export const panelNewRoute = async (req, res) => {
     })
 }
 
-export const panelNewApiRoute = async (req, res) => {
+export const panelNewApiRoute = async (req: any, res: any) => {
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/panel')
@@ -69,6 +74,7 @@ export const panelNewApiRoute = async (req, res) => {
             timezone: req.body.timezone,
             type: req.body.type,
             urlId,
+            // @ts-ignore
             userId: decoded.id
         })
         if (req.body.type === 'public') {
@@ -87,24 +93,28 @@ export const panelNewApiRoute = async (req, res) => {
     })
 }
 
-export const panelDeleteRoute = async (req, res) => {
+export const panelDeleteRoute = async (req: any, res: any) => {
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
             return
         }
+        // @ts-ignore
         await UntisAccess.destroy({where: {untisAccessId: req.body.id, userId: decoded.id}})
         res.redirect('/panel')
     })
 }
 
-export const panelIdRoute = async (req, res) => {
+export const panelIdRoute = async (req: any, res: any) => {
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
             return
         }
         const untisAccess = await UntisAccess.findOne(
+            // @ts-ignore
             {where: {urlId: req.params.id, userId: decoded.id}, include: [ PublicUntisAccess, PrivateUnitsAccess ] }
         )
         res.render('panel/show', { untisAccess, apiURL: process.env.API_URL })

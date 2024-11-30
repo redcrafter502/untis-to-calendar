@@ -29,7 +29,7 @@ app.use(cookieParser())
 
 app.get('/ics/:id', async (req, res) => {
     console.info('Updating Calendar')
-    const untisAccess = await UntisAccess.findOne({where: {urlId: req.params.id}, include: [ PublicUntisAccess, PrivateUnitsAccess ]}).catch(err => {
+    const untisAccess = await UntisAccess.findOne({where: {urlId: req.params.id}, include: [ PublicUntisAccess, PrivateUnitsAccess ]}).catch((err: any) => {
         console.error(`Error getting an UnitsAccess for UrlID: ${req.params.id}. Error: `, err)
     })
     if (!untisAccess) {
@@ -38,6 +38,7 @@ app.get('/ics/:id', async (req, res) => {
     }
     console.log('UntisAccess', untisAccess)
     const events = await getEvents(untisAccess)
+    // @ts-ignore
     const {err, value} = ics.createEvents(events)
     if (err) {
         console.error('ICS Error', err)
@@ -52,6 +53,7 @@ app.get('/', async (req, res) => {
     const userCount = await User.count()
     const untisAccessCount = await UntisAccess.count()
 
+    // @ts-ignore
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, (err, _) => {
         const loggedIn = !err;
         res.render('index', {loggedIn, userCount, untisAccessCount})

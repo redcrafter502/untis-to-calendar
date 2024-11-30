@@ -1,4 +1,4 @@
-const UntisAccessModel = (sequelize, Sequelize) => sequelize.define('untisAccesses', {
+const UntisAccessModel = (sequelize: any, Sequelize: any) => sequelize.define('untisAccesses', {
     untisAccessId: {
         type: Sequelize.INTEGER,
         autoIncrement: true,

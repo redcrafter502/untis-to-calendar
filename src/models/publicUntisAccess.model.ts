@@ -1,4 +1,4 @@
-const PrivateUntisAccessModel = (sequelize, Sequelize) => sequelize.define('privateUntisAccesses', {
+const PublicUntisAccessModel = (sequelize: any, Sequelize: any) => sequelize.define('publicUntisAccesses', {
     untisAccessId: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -6,11 +6,7 @@ const PrivateUntisAccessModel = (sequelize, Sequelize) => sequelize.define('priv
         onDelete: 'CASCADE',
         allowNull: false
     },
-    username: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    password: {
+    classId: {
         type: Sequelize.STRING,
         allowNull: false
     }
@@ -18,4 +14,4 @@ const PrivateUntisAccessModel = (sequelize, Sequelize) => sequelize.define('priv
     timestamps: false
 })
 
-export default PrivateUntisAccessModel
+export default PublicUntisAccessModel
