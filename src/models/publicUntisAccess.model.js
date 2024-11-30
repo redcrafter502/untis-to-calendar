@@ -14,4 +14,4 @@ const PublicUntisAccessModel = (sequelize, Sequelize) => sequelize.define('publi
     timestamps: false
 })
 
-module.exports = PublicUntisAccessModel
+export default PublicUntisAccessModel

@@ -15,4 +15,4 @@ const UserModel = (sequelize, Sequelize) => sequelize.define('users', {
     }
 })
 
-module.exports = UserModel
+export default UserModel

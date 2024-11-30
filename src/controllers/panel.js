@@ -1,13 +1,13 @@
-const db = require('../models')
-const jwt = require('jsonwebtoken')
-const {randomUUID} = require('crypto')
-const {getWebUntis} = require('../services/untis')
+import db from '../models/index.js'
+import jwt from 'jsonwebtoken'
+import {randomUUID} from 'node:crypto'
+import {getWebUntis} from '../services/untis.js'
 
 const UntisAccess = db.untisAccess
 const PublicUntisAccess = db.publicUntisAccess
 const PrivateUnitsAccess = db.privateUntisAccess
 
-const panelRoute = async (req, res) => {
+export const panelRoute = async (req, res) => {
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
@@ -18,7 +18,7 @@ const panelRoute = async (req, res) => {
     })
 }
 
-const panelNewRoute = async (req, res) => {
+export const panelNewRoute = async (req, res) => {
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, _) => {
         if (err) {
             res.redirect('/')
@@ -51,7 +51,7 @@ const panelNewRoute = async (req, res) => {
     })
 }
 
-const panelNewApiRoute = async (req, res) => {
+export const panelNewApiRoute = async (req, res) => {
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/panel')
@@ -87,7 +87,7 @@ const panelNewApiRoute = async (req, res) => {
     })
 }
 
-const panelDeleteRoute = async (req, res) => {
+export const panelDeleteRoute = async (req, res) => {
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
@@ -98,7 +98,7 @@ const panelDeleteRoute = async (req, res) => {
     })
 }
 
-const panelIdRoute = async (req, res) => {
+export const panelIdRoute = async (req, res) => {
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
@@ -110,5 +110,3 @@ const panelIdRoute = async (req, res) => {
         res.render('panel/show', { untisAccess, apiURL: process.env.API_URL })
     })
 }
-
-module.exports = {panelRoute, panelNewRoute, panelNewApiRoute, panelDeleteRoute, panelIdRoute}

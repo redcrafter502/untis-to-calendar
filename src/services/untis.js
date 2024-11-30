@@ -1,5 +1,5 @@
-const webuntis = require('webuntis')
-const momentTimezone = require("moment-timezone");
+import webuntis from 'webuntis'
+import momentTimezone from 'moment-timezone'
 
 const parseTime = (time) => {
     const hour = Math.floor(time / 100)
@@ -21,7 +21,7 @@ const getCurrentAndNextWeekRange = () => {
     return { startOfCurrentWeek, endOfNextWeek }
 }
 
-const getWebUntis = (untisAccess) => {
+export const getWebUntis = (untisAccess) => {
     if (untisAccess.type === 'public') {
         return new webuntis.WebUntisAnonymousAuth(untisAccess.school, untisAccess.domain)
     } else {
@@ -69,7 +69,7 @@ const getTimetable = async (startOfCurrentWeek, endOfNextWeek, untisAccess, unti
     }
 }
 
-const getEvents = async (untisAccess) => {
+export const getEvents = async (untisAccess) => {
     const untis = getWebUntis(untisAccess)
     await untis.login().catch(err => {
         console.error('Login Error (getEvents)', err)
@@ -164,5 +164,3 @@ const getEvents = async (untisAccess) => {
     await untis.logout()
     return [...events, ...examEvents]
 }
-
-module.exports = {getWebUntis, getEvents}

@@ -1,10 +1,10 @@
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const db = require('../models')
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import db from '../models/index.js'
 
 const User = db.user
 
-const loginRoute = (req, res) => {
+export const loginRoute = (req, res) => {
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, (err, _) => {
         if (err) {
             res.render('login')
@@ -14,7 +14,7 @@ const loginRoute = (req, res) => {
     })
 }
 
-const loginApiRoute = async (req, res) => {
+export const loginApiRoute = async (req, res) => {
     const user = await User.findOne({where: {email: req.body.email}})
     if (!user) {
         res.redirect('/login')
@@ -36,12 +36,12 @@ const loginApiRoute = async (req, res) => {
     res.redirect('/panel')
 }
 
-const logoutRoute = (req, res) => {
+export const logoutRoute = (req, res) => {
     res.clearCookie('authSession')
     res.redirect('/')
 }
 
-const accountRoute = (req, res) => {
+export const accountRoute = (req, res) => {
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
@@ -52,7 +52,7 @@ const accountRoute = (req, res) => {
     })
 }
 
-const panelChangePasswordRoute = async (req, res) => {
+export const panelChangePasswordRoute = async (req, res) => {
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
@@ -74,7 +74,7 @@ const panelChangePasswordRoute = async (req, res) => {
     })
 }
 
-const deleteAccountRoute = (req, res)  => {
+export const deleteAccountRoute = (req, res)  => {
     jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, async (err, decoded) => {
         if (err) {
             res.redirect('/')
@@ -85,5 +85,3 @@ const deleteAccountRoute = (req, res)  => {
         res.redirect('/logout')
     })
 }
-
-module.exports = {logoutRoute, loginApiRoute, loginRoute, accountRoute, panelChangePasswordRoute, deleteAccountRoute}
