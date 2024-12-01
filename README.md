@@ -25,4 +25,4 @@ DB_POOL_MAX=5
 DB_POOL_MIN=0
 DB_POOL_ACQUIRE=30000
 DB_POOL_IDLE=10000`
-3. Run the command `npm run start` to run the application.
+3. Run the command `npm run dev` to run the application in developer mode.
