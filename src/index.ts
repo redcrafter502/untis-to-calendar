@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import './env.js'
 import express from 'express'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
@@ -53,8 +54,7 @@ app.get('/', async (req, res) => {
     const userCount = await User.count()
     const untisAccessCount = await UntisAccess.count()
 
-    // @ts-ignore
-    jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, (err, _) => {
+    jwt.verify(req.cookies.authSession, process.env.AUTH_SECRET, (err: any) => {
         const loggedIn = !err;
         res.render('index', {loggedIn, userCount, untisAccessCount})
     })
@@ -73,7 +73,7 @@ app.post('/panel/new-api', panelNewApiRoute)
 app.post('/panel/delete', panelDeleteRoute)
 app.get('/panel/:id', panelIdRoute)
 
-const PORT = process.env.PORT || 3000
+const PORT = parseInt(process.env.PORT) || 3000
 db.sequelize.sync().then(() => {
     app.listen(PORT, () => {
         console.log(`Server is running on port: ${PORT}`)

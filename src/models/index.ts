@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize'
+import {Sequelize} from 'sequelize'
 import pg from 'pg'
 
 import UserModel from './user.model.js'
@@ -8,7 +8,6 @@ import PrivateUntisAccessModel from './privateUntisAccess.model.js'
 
 const sslRequired = (process.env.DB_SSL_REQUIRED === 'true')
 
-// @ts-ignore
 const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
@@ -20,13 +19,9 @@ const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USERNAME
       }
     } : {},
     pool: {
-        // @ts-ignore
         max: parseInt(process.env.DB_POOL_MAX),
-        // @ts-ignore
         min: parseInt(process.env.DB_POOL_MIN),
-        // @ts-ignore
         acquire: parseInt(process.env.DB_POOL_ACQUIRE),
-        // @ts-ignore
         idle: parseInt(process.env.DB_POOL_IDLE)
     },
     logging: console.log,
