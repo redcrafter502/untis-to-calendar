@@ -2,14 +2,21 @@
   "version": 2,
   "builds": [
     {
-      "src": "src/index.tsx",
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "buildCommand": "npm run build"
+      }
+    },
+    {
+      "src": "dist/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "src/index.tsx"
+      "dest": "/dist/index.js"
     }
   ]
 }
