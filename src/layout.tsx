@@ -1,4 +1,4 @@
-import {PropsWithChildren} from 'hono/dist/types/jsx'
+import {PropsWithChildren} from 'hono/jsx'
 
 const NavbarLink = (props: { active: boolean, url: string, label: string }) => {
     return (

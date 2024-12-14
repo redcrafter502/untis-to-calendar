@@ -1,20 +1,20 @@
 import 'dotenv/config'
-import './env.js'
+import './env'
 import ics from 'ics'
 import jwt from 'jsonwebtoken'
-import db from './models/db.js'
-import {getEvents} from './services/untis.js'
+import db from './models/db'
+import {getEvents} from './services/untis'
 
 import {Hono} from 'hono'
 import {serve} from '@hono/node-server'
 import {serveStatic} from '@hono/node-server/serve-static'
 import {deleteCookie, getCookie, setCookie} from 'hono/cookie'
 import bcrypt from 'bcryptjs'
-import Layout from './layout.jsx'
-import account from './account.jsx'
-import {AUTH_COOKIE_NAME, isLoggedIn} from './auth.js'
-import Input from './input.jsx'
-import panel from './panel.jsx'
+import Layout from './layout'
+import account from './account'
+import {AUTH_COOKIE_NAME, isLoggedIn} from './auth'
+import Input from './input'
+import panel from './panel'
 
 const TWENTY_FOUR_HOURS_IN_SECONDS = 86400
 const NUMBER_OF_MILLISECONDS_IN_A_SECOND = 1000
