@@ -10,11 +10,11 @@ import {serve} from '@hono/node-server'
 import {serveStatic} from '@hono/node-server/serve-static'
 import {deleteCookie, getCookie, setCookie} from 'hono/cookie'
 import bcrypt from 'bcryptjs'
-import Layout from './layout.js'
-import account from './account.js'
+import Layout from './layout.jsx'
+import account from './account.jsx'
 import {AUTH_COOKIE_NAME, isLoggedIn} from './auth.js'
-import Input from './input.js'
-import panel from './panel.js'
+import Input from './input.jsx'
+import panel from './panel.jsx'
 
 const TWENTY_FOUR_HOURS_IN_SECONDS = 86400
 const NUMBER_OF_MILLISECONDS_IN_A_SECOND = 1000
