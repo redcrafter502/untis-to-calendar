@@ -1,11 +1,11 @@
 import {Hono} from 'hono'
-import {AUTH_COOKIE_NAME, isLoggedIn} from './auth'
+import {AUTH_COOKIE_NAME, isLoggedIn} from './auth.js'
 import {getCookie} from 'hono/cookie'
-import Layout from './layout'
-import Input from './input'
-import {getWebUntis} from './services/untis'
+import Layout from './layout.js'
+import Input from './input.js'
+import {getWebUntis} from './services/untis.js'
 import {randomUUID} from 'node:crypto'
-import db from './models/db'
+import db from './models/db.js'
 
 const UntisAccess = db.untisAccess
 const PublicUntisAccess = db.publicUntisAccess

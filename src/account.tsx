@@ -1,10 +1,10 @@
 import {Hono} from 'hono'
 import {getCookie} from 'hono/cookie'
-import Layout from './layout'
+import Layout from './layout.js'
 import bcrypt from 'bcryptjs'
-import db from './models/db'
-import {AUTH_COOKIE_NAME, isLoggedIn} from './auth'
-import Input from './input'
+import db from './models/db.js'
+import {AUTH_COOKIE_NAME, isLoggedIn} from './auth.js'
+import Input from './input.js'
 
 const User = db.user
 
