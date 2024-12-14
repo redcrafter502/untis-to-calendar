@@ -26,7 +26,7 @@ export const loginApiRoute = async (req: any, res: any) => {
         res.redirect('/login')
         return
     }
-    // @ts-ignore
+
     const token = jwt.sign({id: user.userId}, process.env.AUTH_SECRET, {
         expiresIn: 86400 // 24 hours
     })
