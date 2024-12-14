@@ -1,4 +1,4 @@
-import db from '../models/index.js'
+import db from '../models/db'
 import jwt from 'jsonwebtoken'
 import {randomUUID} from 'node:crypto'
 import {getWebUntis} from '../services/untis.js'

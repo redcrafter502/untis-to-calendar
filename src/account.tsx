@@ -2,7 +2,7 @@ import {Hono} from 'hono'
 import {getCookie} from 'hono/cookie'
 import Layout from './layout'
 import bcrypt from 'bcryptjs'
-import db from './models'
+import db from './models/db'
 import {AUTH_COOKIE_NAME, isLoggedIn} from './auth'
 import Input from './input'
 

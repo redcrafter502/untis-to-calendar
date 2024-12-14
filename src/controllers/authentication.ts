@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import db from '../models/index.js'
+import db from '../models/db'
 
 const User = db.user
 

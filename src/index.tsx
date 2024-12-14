@@ -2,7 +2,7 @@ import 'dotenv/config'
 import './env.js'
 import ics from 'ics'
 import jwt from 'jsonwebtoken'
-import db from './models'
+import db from './models/db'
 import {getEvents} from './services/untis'
 
 import {Hono} from 'hono'
