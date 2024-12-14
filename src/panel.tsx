@@ -5,7 +5,7 @@ import Layout from './layout'
 import Input from './input'
 import {getWebUntis} from './services/untis'
 import {randomUUID} from 'node:crypto'
-import db from './models'
+import db from './models/db'
 
 const UntisAccess = db.untisAccess
 const PublicUntisAccess = db.publicUntisAccess
