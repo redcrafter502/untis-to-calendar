@@ -1,13 +1,13 @@
 {
   "functions": {
-    "api/index.ts": {
+    "src/api/index.ts": {
       "includeFiles": "/**/*"
     }
   },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "api/index.ts"
+      "destination": "src/api/index.ts"
     }
   ]
 }
