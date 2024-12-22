@@ -7,6 +7,7 @@ import {getEvents} from './services/untis.js'
 
 import {Hono} from 'hono'
 import {serve} from '@hono/node-server'
+import {handle} from 'hono/vercel'
 import {serveStatic} from '@hono/node-server/serve-static'
 import {deleteCookie, getCookie, setCookie} from 'hono/cookie'
 import bcrypt from 'bcryptjs'
@@ -116,6 +117,8 @@ app.route('/account', account)
 
 app.route('/panel', panel)
 
-db.sequelize.sync().then(() => {
-    serve(app)
-})
+await db.sequelize.sync()
+serve(app)
+
+export const GET = handle(app)
+export const POST = handle(app)
