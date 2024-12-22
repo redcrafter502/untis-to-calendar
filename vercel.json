@@ -2,14 +2,14 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
-    "api/vercel": {
+    "api": {
       "includeFiles": "/**/*"
     }
   },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "api/vercel"
+      "destination": "api"
     }
   ]
 }
