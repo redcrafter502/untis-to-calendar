@@ -2,8 +2,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
-    "dist/index.js": {
-      "runtime": "nodejs18.x"
-    }
+    "dist/index.js": {}
   }
 }
