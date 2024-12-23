@@ -9,7 +9,7 @@
     "dev": "tsx src/index.tsx",
     "build": "node build.js",
     "start": "node dist/index.js",
-    "serve": "npm run build && npm run start"
+    "serve": "pnpm run build && pnpm run start"
   },
   "author": "",
   "license": "ISC",

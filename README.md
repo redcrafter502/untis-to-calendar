@@ -10,8 +10,8 @@ Untis to Calendar is a project that enables you to sync your timetable from [Web
 Currently, this project supports anonymous login to Untis.
 <a name="run"></a>
 ## How do I run it?
-To run the backend and to run the frontend you must have installed [NodeJs](https://nodejs.org).
-1. Run the command `npm install` to install the necessary dependencies.
+To run the backend and to run the frontend you must have [NodeJs](https://nodejs.org) installed and ideally [pnpm](https://pnpm.io/).
+1. Run the command `pnpm install` to install the necessary dependencies.
 2. Create a `.env` file with the following configurations:
     * Here you can change the port. Example: `PORT=2000`
     * You need to specify an auth secret for jsonwebtoken. Example: `AUTH_SECRET="supersecretsecret"`
@@ -25,4 +25,4 @@ DB_POOL_MAX=5
 DB_POOL_MIN=0
 DB_POOL_ACQUIRE=30000
 DB_POOL_IDLE=10000`
-3. Run the command `npm run dev` to run the application in developer mode.
+3. Run the command `pnpm run dev` to run the application in developer mode.
