@@ -6,8 +6,6 @@ import db from './models/db.js'
 import {getEvents} from './services/untis.js'
 
 import {Hono} from 'hono'
-import {serve} from '@hono/node-server'
-import {handle} from 'hono/vercel'
 import {serveStatic} from '@hono/node-server/serve-static'
 import {deleteCookie, getCookie, setCookie} from 'hono/cookie'
 import bcrypt from 'bcryptjs'
@@ -24,8 +22,6 @@ const UntisAccess = db.untisAccess
 const PublicUntisAccess = db.publicUntisAccess
 const PrivateUnitsAccess = db.privateUntisAccess
 const User = db.user
-
-//const PORT = parseInt(process.env.PORT) || 3000
 
 // TODO: Add Suspense and ErrorBoundary
 
