@@ -118,7 +118,6 @@ app.route('/account', account)
 app.route('/panel', panel)
 
 await db.sequelize.sync()
-serve(app)
+//serve(app)
 
-export const GET = handle(app)
-export const POST = handle(app)
+export default app
