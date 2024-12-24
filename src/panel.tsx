@@ -24,7 +24,8 @@ const UntisAccessesList = async (props: { id: number }) => {
                 return (
                     <div>
                         <h4><a href={`/panel/${untisAccess.urlId}`}>{untisAccess.name}</a></h4>
-                        <p>{url} <button onClick={`copyToClipboard('${url}')`} class="btn btn-secondary">Copy</button></p>
+                        { /* TODO: Add copy to clipboard functionality on click */ }
+                        <p>{url} <button class="btn btn-secondary">Copy</button></p>
                     </div>
                 )
             })}
@@ -76,7 +77,6 @@ app.post('/new', async (c) => {
             const untis = getWebUntis({ school, domain, type: 'public' })
             await untis.login()
             const schoolYear = await untis.getCurrentSchoolyear()
-            // @ts-ignore
             classes = await untis.getClasses(true, schoolYear.id)
             await untis.logout()
         } catch {
@@ -120,10 +120,9 @@ app.post('/new', async (c) => {
                     <div className="form-group mb-3">
                         <label htmlFor="classes">Select Class</label>
                         <select name="classes" id="classes" className="form-control">
-                            {// @ts-ignore
-                                classes.map(c => (
-                                    <option value={c.id}>{c.name}</option>
-                                ))}
+                            {classes?.map(c => (
+                                <option value={c.id}>{c.name}</option>
+                            ))}
                         </select>
                     </div>
                 ) : (
@@ -189,9 +188,8 @@ app.get('/:urlId', async (c) => {
         <Layout title={untisAccess.name} loggedIn={true}>
             <h2>{untisAccess.name}</h2>
             <p>Name: {untisAccess.name}</p>
-            <p>Url for ICS: {url}
-                <button onClick={`copyToClipboard('${url}')`} className="btn btn-secondary">Copy</button>
-            </p>
+            { /* TODO: Add copy to clipboard functionality on click */ }
+            <p>Url for ICS: {url} <button className="btn btn-secondary">Copy</button></p>
             <p>UrlID: {untisAccess.urlId}</p>
             <p>School: {untisAccess.school}</p>
             <p>Domain: {untisAccess.domain}</p>
@@ -208,6 +206,7 @@ app.get('/:urlId', async (c) => {
                     <p>Untis Password: {untisAccess.privateUntisAccess.password}</p>
                 </>
             )}
+            { /* TODO: find a better way to handle the client-side onSubmit */ }
             <form id="deleteForm" action="/panel/delete" method="post" onSubmit="return confirm('Are you sure you want to delete?');">
                 <input type="hidden" name="id" id="id" value={untisAccess.untisAccessId}/>
                 <button type="submit" className="btn btn-danger">Delete</button>

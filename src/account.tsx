@@ -30,6 +30,7 @@ app.get('/', (c) => {
             <h2>Your Account</h2>
             <AccountInfo id={id} />
             <h2 class="mt-4">Change Password</h2>
+            { /* TODO: add client-side equality check for old and new password */ }
             <form action="/account/change-password" method="post">
                 <Input id="oldPassword" label="Old Password" type="password" required/>
                 {/*<div class="form-group">
@@ -47,8 +48,8 @@ app.get('/', (c) => {
                 <button type="submit" className="mt-3 btn btn-primary">Change Password</button>
             </form>
             <h2 className="mt-4">Delete Account</h2>
-            <form id="deleteForm" action="/account/delete" method="post"
-                  onSubmit="return confirm('Are you sure you want to delete?');">
+            { /* TODO: find a better way to handle the client-side onSubmit */ }
+            <form id="deleteForm" action="/account/delete" method="post" onSubmit="return confirm('Are you sure you want to delete?');">
                 <button type="submit" className="btn btn-danger">Delete</button>
             </form>
         </Layout>
