@@ -1,7 +1,8 @@
 {
   "functions": {
     "api/index.ts": {
-      "includeFiles": "**/*"
+      "includeFiles": "/src/**/*",
+      "excludeFiles": "/src/node.ts"
     }
   },
   "rewrites": [
