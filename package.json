@@ -2,15 +2,16 @@
   "name": "untis-to-calendar",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/node.js",
+  "main": "dist/src/index.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1 /*",
     "vercel:dev": "vercel dev",
-    "node:dev": "tsx src/node.ts",
-    "node:build": "node build.js",
-    "node:start": "node dist/node.js",
-    "node:serve": "pnpm run node:build && pnpm run node:start"
+    "node:dev": "tsx watch src/index.ts",
+    "esbuild:build": "node build.js && tsc-alias",
+    "build": "tsc && tsc-alias",
+    "start": "node dist/src/index.js",
+    "serve": "pnpm run build && pnpm run start"
   },
   "author": "",
   "license": "ISC",
@@ -36,6 +37,7 @@
     "@types/pg": "^8.11.10",
     "esbuild": "^0.24.0",
     "glob": "^11.0.0",
+    "tsc-alias": "^1.8.10",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vercel": "^39.2.2"

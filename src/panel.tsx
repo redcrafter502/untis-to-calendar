@@ -1,11 +1,11 @@
 import {Hono} from 'hono'
-import {AUTH_COOKIE_NAME, isLoggedIn} from './auth.js'
+import {AUTH_COOKIE_NAME, isLoggedIn} from '@/auth'
 import {getCookie} from 'hono/cookie'
-import Layout from './layout.js'
-import Input from './input.js'
-import {getWebUntis} from './services/untis.js'
+import Layout from '@/layout'
+import Input from '@/input'
+import {getWebUntis} from '@/services/untis'
 import {randomUUID} from 'node:crypto'
-import db from './models/db.js'
+import db from '@/models/db'
 
 const UntisAccess = db.untisAccess
 const PublicUntisAccess = db.publicUntisAccess
@@ -207,7 +207,8 @@ app.get('/:urlId', async (c) => {
                 </>
             )}
             { /* TODO: find a better way to handle the client-side onSubmit */ }
-            <form id="deleteForm" action="/panel/delete" method="post" onSubmit="return confirm('Are you sure you want to delete?');">
+            { /* <form id="deleteForm" action="/panel/delete" method="post" onSubmit="return confirm('Are you sure you want to delete?');"> */ }
+            <form id="deleteForm" action="/panel/delete" method="post">
                 <input type="hidden" name="id" id="id" value={untisAccess.untisAccessId}/>
                 <button type="submit" className="btn btn-danger">Delete</button>
             </form>
