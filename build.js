@@ -5,7 +5,7 @@ import {glob} from 'glob'
 console.log('in File')
 
 esbuild.build({
-    //entryPoints: ['./src/index.tsx'],
+    //entryPoints: ['./src/app.tsx'], // './src/index.ts'
     entryPoints: glob.sync('./src/**/*.{ts,tsx}'),
     outdir: './dist',
     bundle: false,

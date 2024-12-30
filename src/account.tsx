@@ -1,10 +1,10 @@
 import {Hono} from 'hono'
 import {getCookie} from 'hono/cookie'
-import Layout from './layout.js'
+import Layout from '@/layout'
 import bcrypt from 'bcryptjs'
-import db from './models/db.js'
-import {AUTH_COOKIE_NAME, isLoggedIn} from './auth.js'
-import Input from './input.js'
+import db from '@/models/db'
+import {AUTH_COOKIE_NAME, isLoggedIn} from '@/auth'
+import Input from '@/input'
 
 const User = db.user
 
@@ -49,7 +49,8 @@ app.get('/', (c) => {
             </form>
             <h2 className="mt-4">Delete Account</h2>
             { /* TODO: find a better way to handle the client-side onSubmit */ }
-            <form id="deleteForm" action="/account/delete" method="post" onSubmit="return confirm('Are you sure you want to delete?');">
+            { /* <form id="deleteForm" action="/account/delete" method="post" onSubmit="return confirm('Are you sure you want to delete?');"> */ }
+            <form id="deleteForm" action="/account/delete" method="post">
                 <button type="submit" className="btn btn-danger">Delete</button>
             </form>
         </Layout>

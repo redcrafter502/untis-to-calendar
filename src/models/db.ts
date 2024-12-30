@@ -1,10 +1,10 @@
 import {Sequelize} from 'sequelize'
 import pg from 'pg'
 
-import UserModel from './user.model.js'
-import UntisAccessModel from './untisAccess.model.js'
-import PublicUntisAccessModel from './publicUntisAccess.model.js'
-import PrivateUntisAccessModel from './privateUntisAccess.model.js'
+import UserModel from '@/models/user.model'
+import UntisAccessModel from '@/models/untisAccess.model'
+import PublicUntisAccessModel from '@/models/publicUntisAccess.model.js'
+import PrivateUntisAccessModel from '@/models/privateUntisAccess.model.js'
 
 const sslRequired = (process.env.DB_SSL_REQUIRED === 'true')
 
