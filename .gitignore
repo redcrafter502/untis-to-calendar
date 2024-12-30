@@ -3,3 +3,6 @@ node_modules/
 .idea/
 dist/
 .vercel
+
+# The directiry for generated/copied static files
+public/c

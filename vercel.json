@@ -1,7 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/public/:path*",
+      "destination": "/:path*"
+    },
+    {
+      "source": "/((?!public).*)",
       "destination": "/api"
     }
   ]

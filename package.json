@@ -7,11 +7,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1 /*",
     "vercel:dev": "vercel dev",
-    "node:dev": "tsx watch src/index.ts",
+    "node:dev": "pnpm run copy-files-to-public && tsx watch src/index.ts",
     "esbuild:build": "node build.js && tsc-alias",
-    "build": "tsc && tsc-alias",
+    "build": "tsc && tsc-alias && pnpm run copy-files-to-public",
     "start": "node dist/src/index.js",
-    "serve": "pnpm run build && pnpm run start"
+    "serve": "pnpm run build && pnpm run start",
+    "copy-files-to-public": "cpx node_modules/bootstrap/dist/css/bootstrap.min.css public/c"
   },
   "author": "",
   "license": "ISC",
@@ -35,6 +36,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.1",
     "@types/pg": "^8.11.10",
+    "cpx": "^1.5.0",
     "esbuild": "^0.24.0",
     "glob": "^11.0.0",
     "tsc-alias": "^1.8.10",

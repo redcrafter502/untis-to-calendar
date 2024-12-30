@@ -17,7 +17,8 @@ const Layout = (props: PropsWithChildren<{ title: string, loggedIn: boolean, act
             <meta charset="UTF-8"/>
             <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
             <title>{props.title}</title>
-            <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+            <link rel="stylesheet" href="/public/c/bootstrap.min.css"/>
+            <script type="text/javascript" src="/public/client.js" defer></script>
         </head>
         <body>
         <nav class="navbar navbar-expand bg-body-tertiary">
