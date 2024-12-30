@@ -6,7 +6,6 @@ import db from '@/models/db'
 import {getEvents} from '@/services/untis'
 
 import {Hono} from 'hono'
-import {serveStatic} from '@hono/node-server/serve-static'
 import {deleteCookie, getCookie, setCookie} from 'hono/cookie'
 import bcrypt from 'bcryptjs'
 import Layout from '@/layout'
@@ -26,8 +25,6 @@ const User = db.user
 // TODO: Add Suspense and ErrorBoundary
 
 const app = new Hono()
-
-app.use('/css/bootstrap.min.css', serveStatic({ path: './node_modules/bootstrap/dist/css/bootstrap.min.css' }))
 
 app.get('/ics/:id', async (c) => {
     console.info('Updating Calendar')
@@ -114,6 +111,5 @@ app.route('/account', account)
 app.route('/panel', panel)
 
 await db.sequelize.sync()
-//serve(app)
 
 export default app
