@@ -9,10 +9,10 @@ import {Hono} from 'hono'
 import {deleteCookie, getCookie, setCookie} from 'hono/cookie'
 import bcrypt from 'bcryptjs'
 import Layout from '@/layout'
-import account from '@/account'
+import account from '@/routes/account'
 import {AUTH_COOKIE_NAME, isLoggedIn} from '@/auth'
 import Input from '@/input'
-import panel from '@/panel'
+import panel from '@/routes/panel'
 
 const TWENTY_FOUR_HOURS_IN_SECONDS = 86400
 const NUMBER_OF_MILLISECONDS_IN_A_SECOND = 1000
