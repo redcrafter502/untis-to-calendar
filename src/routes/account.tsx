@@ -30,27 +30,14 @@ app.get('/', (c) => {
             <h2>Your Account</h2>
             <AccountInfo id={id} />
             <h2 class="mt-4">Change Password</h2>
-            { /* TODO: add client-side equality check for old and new password */ }
             <form action="/account/change-password" method="post">
                 <Input id="oldPassword" label="Old Password" type="password" required/>
-                {/*<div class="form-group">
-                    <label for="newPassword">New Password</label>
-                    <input required type="password" name="newPassword" id="newPassword"
-                           oninput="checkConfirmedPassword()" class="form-control"/>
-                </div>*/}
                 <Input id="newPassword" label="New Password" type="password" required/>
-                {/*<div class="form-group">
-                    <label for="newPasswordConfirmed">Confirm New Password</label>
-                    <input required type="password" name="newPasswordConfirmed" id="newPasswordConfirmed"
-                           oninput="checkConfirmedPassword()" class="form-control"/>
-                </div>*/}
                 <Input id="newPasswordConfirmed" label="Confirm New Password" type="password" required/>
                 <button type="submit" className="mt-3 btn btn-primary">Change Password</button>
             </form>
             <h2 className="mt-4">Delete Account</h2>
-            { /* TODO: find a better way to handle the client-side onSubmit */ }
-            { /* <form id="deleteForm" action="/account/delete" method="post" onSubmit="return confirm('Are you sure you want to delete?');"> */ }
-            <form id="deleteForm" action="/account/delete" method="post">
+            <form id="deleteForm" action="/account/delete" method="post" submit-delete-confirm>
                 <button type="submit" className="btn btn-danger">Delete</button>
             </form>
         </Layout>

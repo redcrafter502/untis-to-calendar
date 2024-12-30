@@ -24,8 +24,7 @@ const UntisAccessesList = async (props: { id: number }) => {
                 return (
                     <div>
                         <h4><a href={`/panel/${untisAccess.urlId}`}>{untisAccess.name}</a></h4>
-                        { /* TODO: Add copy to clipboard functionality on click */ }
-                        <p>{url} <button class="btn btn-secondary">Copy</button></p>
+                        <p>{url} <button onclick-copy={url} class="btn btn-secondary">Copy</button></p>
                     </div>
                 )
             })}
@@ -188,8 +187,7 @@ app.get('/:urlId', async (c) => {
         <Layout title={untisAccess.name} loggedIn={true}>
             <h2>{untisAccess.name}</h2>
             <p>Name: {untisAccess.name}</p>
-            { /* TODO: Add copy to clipboard functionality on click */ }
-            <p>Url for ICS: {url} <button className="btn btn-secondary">Copy</button></p>
+            <p>Url for ICS: {url} <button onclick-copy={url} className="btn btn-secondary">Copy</button></p>
             <p>UrlID: {untisAccess.urlId}</p>
             <p>School: {untisAccess.school}</p>
             <p>Domain: {untisAccess.domain}</p>
@@ -206,9 +204,7 @@ app.get('/:urlId', async (c) => {
                     <p>Untis Password: {untisAccess.privateUntisAccess.password}</p>
                 </>
             )}
-            { /* TODO: find a better way to handle the client-side onSubmit */ }
-            { /* <form id="deleteForm" action="/panel/delete" method="post" onSubmit="return confirm('Are you sure you want to delete?');"> */ }
-            <form id="deleteForm" action="/panel/delete" method="post">
+            <form id="deleteForm" action="/panel/delete" method="post" submit-delete-confirm>
                 <input type="hidden" name="id" id="id" value={untisAccess.untisAccessId}/>
                 <button type="submit" className="btn btn-danger">Delete</button>
             </form>
