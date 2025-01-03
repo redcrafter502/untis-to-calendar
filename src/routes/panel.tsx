@@ -5,21 +5,19 @@ import Layout from '@/layout'
 import Input from '@/input'
 import {getWebUntis} from '@/services/untis'
 import {randomUUID} from 'node:crypto'
-import db from '@/models/db'
-
-const UntisAccess = db.untisAccess
-const PublicUntisAccess = db.publicUntisAccess
-const PrivateUnitsAccess = db.privateUntisAccess
+import {db} from '@/db'
+import {privateUntisAccesses, publicUntisAccesses, untisAccesses} from '@/db/schema'
+import {eq, and} from 'drizzle-orm'
 
 const app = new Hono()
 
 const UntisAccessesList = async (props: { id: number }) => {
-    const untisAccesses = await UntisAccess.findAll({where: {userId: props.id}})
+    const usersUntisAccesses = await db.select().from(untisAccesses).where(eq(untisAccesses.userId, props.id))
 
     return (
-        (untisAccesses && untisAccesses.length >= 1) ? <>
-            <p>You have {untisAccesses.length} UntisAccess{untisAccesses.length === 1 ? '' : 'es'}</p>
-            {untisAccesses.map((untisAccess: any) => {
+        (usersUntisAccesses && usersUntisAccesses.length >= 1) ? <>
+            <p>You have {usersUntisAccesses.length} UntisAccess{usersUntisAccesses.length === 1 ? '' : 'es'}</p>
+            {usersUntisAccesses.map((untisAccess) => {
                 const url = `${process.env.API_URL}/ics/${untisAccess.urlId}`
                 return (
                     <div>
@@ -73,7 +71,7 @@ app.post('/new', async (c) => {
     let classes = null
     if (type === 'public') {
         try {
-            const untis = getWebUntis({ school, domain, type: 'public' })
+            const untis = getWebUntis({ untisAccesses: { school, domain, type: 'public' }})
             await untis.login()
             const schoolYear = await untis.getCurrentSchoolyear()
             classes = await untis.getClasses(true, schoolYear.id)
@@ -148,25 +146,28 @@ app.post('/new-api', async (c) => {
     if (!loggedIn) return c.redirect('/panel')
     if (!(body['type'] === 'public' || body['type'] === 'private')) return c.redirect('/panel')
     const urlId = randomUUID()
-    const access = await UntisAccess.create({
-        name: body['name'],
-        domain: body['domain'],
-        school: body['school'],
-        timezone: body['timezone'],
-        type: body['type'],
+    // TODO: find a better way than using a zero index
+    const access = (await db.insert(untisAccesses).values({
+        name: body['name'] as string,
+        domain: body['domain'] as string,
+        school: body['school'] as string,
+        timezone: body['timezone'] as string,
+        type: body['type'] as 'public' | 'private',
         urlId,
-        userId: id
-    })
+        userId: id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    }).returning({ untisAccessId: untisAccesses.untisAccessId }))[0]
     if (body['type'] === 'public') {
-        await PublicUntisAccess.create({
+        await db.insert(publicUntisAccesses).values({
             untisAccessId: access.untisAccessId,
-            classId: body['classes']
+            classId: body['classes'] as string,
         })
     } else {
-        await PrivateUnitsAccess.create({
+        await db.insert(privateUntisAccesses).values({
             untisAccessId: access.untisAccessId,
-            username: body['username'],
-            password: body['password']
+            username: body['username'] as string,
+            password: body['password'] as string,
         })
     }
     return c.redirect(`/panel/${urlId}`)
@@ -177,35 +178,39 @@ app.get('/:urlId', async (c) => {
     const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
     if (!loggedIn) return c.redirect('/')
 
-    const untisAccess = await UntisAccess.findOne(
-        {where: {urlId, userId: id}, include: [ PublicUntisAccess, PrivateUnitsAccess ] }
-    )
+    // TODO: find a better way than using a zero index
+    const untisAccess = (await db.select()
+        .from(untisAccesses)
+        .leftJoin(privateUntisAccesses, eq(untisAccesses.untisAccessId, privateUntisAccesses.untisAccessId))
+        .leftJoin(publicUntisAccesses, eq(untisAccesses.untisAccessId, publicUntisAccesses.untisAccessId))
+        .where(and(eq(untisAccesses.urlId, urlId), eq(untisAccesses.userId, id)))
+    )[0]
 
-    const url = `${process.env.API_URL}/ics/${untisAccess.urlId}`
+    const url = `${process.env.API_URL}/ics/${untisAccess.untisAccesses.urlId}`
 
     return c.html(
-        <Layout title={untisAccess.name} loggedIn={true}>
-            <h2>{untisAccess.name}</h2>
-            <p>Name: {untisAccess.name}</p>
+        <Layout title={untisAccess.untisAccesses.name} loggedIn={true}>
+            <h2>{untisAccess.untisAccesses.name}</h2>
+            <p>Name: {untisAccess.untisAccesses.name}</p>
             <p>Url for ICS: {url} <button onclick-copy={url} className="btn btn-secondary">Copy</button></p>
-            <p>UrlID: {untisAccess.urlId}</p>
-            <p>School: {untisAccess.school}</p>
-            <p>Domain: {untisAccess.domain}</p>
-            <p>Timezone: {untisAccess.timezone}</p>
-            {(untisAccess.type === 'public') ? (
+            <p>UrlID: {untisAccess.untisAccesses.urlId}</p>
+            <p>School: {untisAccess.untisAccesses.school}</p>
+            <p>Domain: {untisAccess.untisAccesses.domain}</p>
+            <p>Timezone: {untisAccess.untisAccesses.timezone}</p>
+            {(untisAccess.untisAccesses.type === 'public' && untisAccess.publicUntisAccesses) ? (
                 <>
                     <p>Type: Public Timetable</p>
-                    <p>ClassID: {untisAccess.publicUntisAccess.classId}</p>
+                    <p>ClassID: {untisAccess.publicUntisAccesses.classId}</p>
                 </>
-            ) : (
+            ) : (untisAccess.privateUntisAccesses) ? (
                 <>
                     <p>Type: Private Timetable</p>
-                    <p>Untis Username: {untisAccess.privateUntisAccess.username}</p>
-                    <p>Untis Password: {untisAccess.privateUntisAccess.password}</p>
+                    <p>Untis Username: {untisAccess.privateUntisAccesses.username}</p>
+                    <p>Untis Password: {untisAccess.privateUntisAccesses.password}</p>
                 </>
-            )}
+            ) : 'DB SCHEMA ERROR: field type and existing relations do not match'}
             <form id="deleteForm" action="/panel/delete" method="post" submit-delete-confirm>
-                <input type="hidden" name="id" id="id" value={untisAccess.untisAccessId}/>
+                <input type="hidden" name="id" id="id" value={untisAccess.untisAccesses.untisAccessId}/>
                 <button type="submit" className="btn btn-danger">Delete</button>
             </form>
         </Layout>
@@ -217,7 +222,7 @@ app.post('/delete', async (c) => {
     const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
     if (!loggedIn) return c.redirect('/')
 
-    await UntisAccess.destroy({where: {untisAccessId: body['id'], userId: id}})
+    await db.delete(untisAccesses).where(and(eq(untisAccesses.untisAccessId, parseInt(body['id'] as string)), eq(untisAccesses.userId, id)))
     return c.redirect('/panel')
 })
 

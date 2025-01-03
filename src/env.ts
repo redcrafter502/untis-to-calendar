@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import {z} from 'zod'
 
 const envSchema = z.object({
@@ -14,6 +15,8 @@ const envSchema = z.object({
     DB_POOL_MIN: z.string(),
     DB_POOL_ACQUIRE: z.string(),
     DB_POOL_IDLE: z.string(),
+
+    DATABASE_URL: z.string().url(),
 })
 
 envSchema.parse(process.env)
