@@ -1,5 +1,5 @@
 import {Hono} from 'hono'
-import {AUTH_COOKIE_NAME, isLoggedIn} from '@/auth'
+import {AUTH_COOKIE_NAME, isLoggedIn} from '@/services/auth'
 import {getCookie} from 'hono/cookie'
 import Layout from '@/layout'
 import Input from '@/input'
@@ -225,6 +225,5 @@ app.post('/delete', async (c) => {
     await db.delete(untisAccesses).where(and(eq(untisAccesses.untisAccessId, parseInt(body['id'] as string)), eq(untisAccesses.userId, id)))
     return c.redirect('/panel')
 })
-
 
 export default app
