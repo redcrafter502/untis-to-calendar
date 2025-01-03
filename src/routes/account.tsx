@@ -2,21 +2,22 @@ import {Hono} from 'hono'
 import {getCookie} from 'hono/cookie'
 import Layout from '@/layout'
 import bcrypt from 'bcryptjs'
-import db from '@/models/db'
 import {AUTH_COOKIE_NAME, isLoggedIn} from '@/auth'
 import Input from '@/input'
-
-const User = db.user
+import {db} from '@/db'
+import {users} from '@/db/schema'
+import {eq} from 'drizzle-orm'
 
 const app = new Hono()
 
 const AccountInfo = async (props: { id: number }) => {
-    const user = await User.findByPk(props.id)
+    // TODO: find a better way than using a zero index
+    const user = (await db.select().from(users).where(eq(users.userId, props.id)))[0]
 
     return (
         <>
             <p>Email: {user.email}</p>
-            <p>Created At: {user.createdAt.toString()}</p>
+            <p>Created At: {user.createdAt}</p>
         </>
     )
 }
@@ -49,11 +50,12 @@ app.post('/change-password', async (c) => {
     const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
     if (!loggedIn) return c.redirect('/')
 
-    const user = await User.findByPk(id)
+    // TODO: find a better way than using a zero index
+    const user = (await db.select().from(users).where(eq(users.userId, id)))[0]
     const oldPasswordIsValid = bcrypt.compareSync(body['oldPassword'] as string, user.password)
     if (!oldPasswordIsValid) return c.redirect('/account')
-    user.password = bcrypt.hashSync(body['newPassword'] as string, 10)
-    user.save()
+    const newPassword = bcrypt.hashSync(body['newPassword'] as string, 10)
+    await db.update(users).set({ password: newPassword }).where(eq(users.userId, id))
     return c.redirect('/account')
 })
 
@@ -61,8 +63,7 @@ app.post('/delete', async (c) => {
     const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
     if (!loggedIn) return c.redirect('/')
 
-    const user = await User.findByPk(id)
-    await user.destroy()
+    await db.delete(users).where(eq(users.userId, id))
     return c.redirect('/logout')
 })
 

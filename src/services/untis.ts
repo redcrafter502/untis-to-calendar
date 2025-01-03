@@ -21,11 +21,35 @@ const getCurrentAndNextWeekRange = () => {
     return { startOfCurrentWeek, endOfNextWeek }
 }
 
-export const getWebUntis = (untisAccess: any) => {
-    if (untisAccess.type === 'public') {
-        return new webuntis.WebUntisAnonymousAuth(untisAccess.school, untisAccess.domain)
+type UntisAccessOrPublicData = {
+    untisAccesses: {
+        type: 'public' | 'private'
+        untisAccessId?: number
+        userId?: number
+        name?: string
+        urlId?: string
+        school: string
+        domain: string
+        timezone?: string
+        createdAt?: string
+        updatedAt?: string
+    }
+    privateUntisAccesses?: {
+        untisAccessId: number
+        password: string
+        username: string
+    } | null
+    publicUntisAccesses?: {
+        untisAccessId: number
+        classId: string
+    } | null
+}
+
+export const getWebUntis = (untisAccess: UntisAccessOrPublicData) => {
+    if (untisAccess.untisAccesses.type === 'private' && untisAccess.privateUntisAccesses) {
+        return new webuntis.WebUntis(untisAccess.untisAccesses.school, untisAccess.privateUntisAccesses.username, untisAccess.privateUntisAccesses.password, untisAccess.untisAccesses.domain)
     } else {
-        return new webuntis.WebUntis(untisAccess.school, untisAccess.privateUntisAccess.username, untisAccess.privateUntisAccess.password, untisAccess.domain)
+        return new webuntis.WebUntisAnonymousAuth(untisAccess.untisAccesses.school, untisAccess.untisAccesses.domain)
     }
 }
 
@@ -61,15 +85,39 @@ const getOwnTimetable = async (startOfCurrentWeek: string | number | Date, endOf
         return returnTimetable
     })
 
-const getTimetable = async (startOfCurrentWeek: Date, endOfNextWeek: Date, untisAccess: any, untis: webuntis.Base) => {
-    if (untisAccess.type === 'public') {
-        return await getPublicTimetable(startOfCurrentWeek, endOfNextWeek, untisAccess.publicUntisAccess.classId, untis)
+const getTimetable = async (startOfCurrentWeek: Date, endOfNextWeek: Date, untisAccess: UntisAccess, untis: webuntis.Base) => {
+    if (untisAccess.untisAccesses.type === 'public' && untisAccess.publicUntisAccesses) {
+        return await getPublicTimetable(startOfCurrentWeek, endOfNextWeek, untisAccess.publicUntisAccesses.classId, untis)
     } else {
         return await getOwnTimetable(startOfCurrentWeek, endOfNextWeek, untis)
     }
 }
 
-export const getEvents = async (untisAccess: any) => {
+type UntisAccess = {
+    untisAccesses: {
+        type: 'public' | 'private'
+        untisAccessId: number
+        userId: number
+        name: string
+        urlId: string
+        school: string
+        domain: string
+        timezone: string
+        createdAt: string
+        updatedAt: string
+    }
+    privateUntisAccesses: {
+        untisAccessId: number
+        password: string
+        username: string
+    } | null
+    publicUntisAccesses: {
+        untisAccessId: number
+        classId: string
+    } | null
+}
+
+export const getEvents = async (untisAccess: UntisAccess) => {
     const untis = getWebUntis(untisAccess)
     await untis.login().catch(err => {
         console.error('Login Error (getEvents)', err)
@@ -84,7 +132,7 @@ export const getEvents = async (untisAccess: any) => {
         lessons: []
     }
     let examEvents: { start: number[]; startInputType: string; startOutputType: string; end: number[]; endInputType: string; endOutputType: string; title: string; description: string; location: string; status: string; busyStatus: string; transp: string; calName: any }[] = []
-    if (untisAccess.type === 'private') {
+    if (untisAccess.untisAccesses.type === 'private') {
         // @ts-ignore
         homework = await untis.getHomeWorksFor(startOfCurrentWeek, endOfNextWeek)
 
@@ -96,8 +144,8 @@ export const getEvents = async (untisAccess: any) => {
             const day = exam.examDate % 100
             const [startHour, startMinute] = parseTime(exam.startTime)
             const [endHour, endMinute] = parseTime(exam.endTime)
-            const startUtc = momentTimezone.tz([year, month - 1, day, startHour, startMinute], untisAccess.timezone).utc()
-            const endUtc = momentTimezone.tz([year, month - 1, day, endHour, endMinute], untisAccess.timezone).utc()
+            const startUtc = momentTimezone.tz([year, month - 1, day, startHour, startMinute], untisAccess.untisAccesses.timezone).utc()
+            const endUtc = momentTimezone.tz([year, month - 1, day, endHour, endMinute], untisAccess.untisAccesses.timezone).utc()
             const title = `${exam.name} (${exam.examType})` || 'NO TITLE'
             const description = `${exam.name} (${exam.subject} - ${exam.studentClass.join(' ')} - ${exam.teachers.join(' ')}) ${exam.text}` || 'NO DESCRIPTION'
             const location = exam.rooms.join(' ') || 'NO LOCATION'
@@ -115,12 +163,11 @@ export const getEvents = async (untisAccess: any) => {
                 status: 'CONFIRMED',
                 busyStatus: 'BUSY',
                 transp: 'OPAQUE',
-                calName: untisAccess.name
+                calName: untisAccess.untisAccesses.name
             }
         })
     }
 
-    // @ts-ignore
     const events = timetable.map(lesson => {
         const homeworks: string[] = []
         homework.homeworks.forEach(iHomework => {
@@ -148,8 +195,8 @@ export const getEvents = async (untisAccess: any) => {
         const title = lesson.su[0].name || lesson.lstext || 'NO TITLE'
         const description = `${lesson.su[0].longname} - ${lesson.kl.map(k => k.name).join(', ')}` || `${lesson.lstext} - ${lesson.kl[0].name}` || 'NO DESCRIPTION'
         const location = `${lesson.ro[0].longname} (${lesson.ro[0].name})` || 'NO LOCATION'
-        const startUtc = momentTimezone.tz([year, month - 1, day, startHour, startMinute], untisAccess.timezone).utc()
-        const endUtc = momentTimezone.tz([year, month - 1, day, endHour, endMinute], untisAccess.timezone).utc()
+        const startUtc = momentTimezone.tz([year, month - 1, day, startHour, startMinute], untisAccess.untisAccesses.timezone).utc()
+        const endUtc = momentTimezone.tz([year, month - 1, day, endHour, endMinute], untisAccess.untisAccesses.timezone).utc()
         const descriptionWithHomework = [description, ...homeworks].join(`\n`)
         const titleWithInfoMark = title + (homeworks.length > 0 ? ' ℹ️' : '')
 
@@ -166,7 +213,7 @@ export const getEvents = async (untisAccess: any) => {
             status: lesson.code === 'cancelled' ? 'CANCELLED' : 'CONFIRMED',
             busyStatus: lesson.code === 'cancelled' ? 'FREE' : 'BUSY',
             transp: lesson.code === 'cancelled' ? 'TRANSPARENT' : 'OPAQUE',
-            calName: untisAccess.name
+            calName: untisAccess.untisAccesses.name
         }
     })
     await untis.logout()

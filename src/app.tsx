@@ -1,8 +1,6 @@
-import 'dotenv/config'
 import '@/env'
 import ics from 'ics'
 import jwt from 'jsonwebtoken'
-import db from '@/models/db'
 import {getEvents} from '@/services/untis'
 
 import {Hono} from 'hono'
@@ -13,14 +11,12 @@ import account from '@/routes/account'
 import {AUTH_COOKIE_NAME, isLoggedIn} from '@/auth'
 import Input from '@/input'
 import panel from '@/routes/panel'
+import {db} from '@/db'
+import {privateUntisAccesses, publicUntisAccesses, untisAccesses, users} from '@/db/schema'
+import {eq} from 'drizzle-orm'
 
 const TWENTY_FOUR_HOURS_IN_SECONDS = 86400
 const NUMBER_OF_MILLISECONDS_IN_A_SECOND = 1000
-
-const UntisAccess = db.untisAccess
-const PublicUntisAccess = db.publicUntisAccess
-const PrivateUnitsAccess = db.privateUntisAccess
-const User = db.user
 
 // TODO: Add Suspense and ErrorBoundary
 
@@ -29,11 +25,13 @@ const app = new Hono()
 app.get('/ics/:id', async (c) => {
     console.info('Updating Calendar')
     const id = c.req.param('id')
-    const untisAccess = await UntisAccess.findOne({where: {urlId: id}, include: [ PublicUntisAccess, PrivateUnitsAccess ]}).catch((err: any) => {
-        console.error(`Error getting an UnitsAccess for UrlID: ${id}. Error: `, err)
-    })
+    const untisAccess = (await db.select()
+            .from(untisAccesses)
+            .leftJoin(privateUntisAccesses, eq(untisAccesses.untisAccessId, privateUntisAccesses.untisAccessId))
+            .leftJoin(publicUntisAccesses, eq(untisAccesses.untisAccessId, publicUntisAccesses.untisAccessId))
+            .where(eq(untisAccesses.urlId, id))
+    )[0]
     if (!untisAccess) return c.text(`Did not found UntisAccess for UrlID: ${id}`, 404)
-    console.log('UntisAccess', untisAccess)
     const events = await getEvents(untisAccess)
     // @ts-ignore
     const {err, value} = ics.createEvents(events)
@@ -47,8 +45,8 @@ app.get('/ics/:id', async (c) => {
 })
 
 const UntisAccessAndUserCount = async () => {
-    const userCount = await User.count()
-    const untisAccessCount = await UntisAccess.count()
+    const userCount = await db.$count(users)
+    const untisAccessCount = await db.$count(untisAccesses)
 
     return (
         <p>Untis to Calendar currently has {untisAccessCount} UntisAccess{untisAccessCount === 1 ? '' : 'es'} from {userCount} User{userCount === 1 ? '' : 's'}</p>
@@ -84,7 +82,8 @@ app.get('/login', (c) => {
 
 app.post('/login-api', async (c) => {
     const body = await c.req.parseBody()
-    const user = await User.findOne({where: {email: body['email']}})
+    // TODO: find a better way than using a zero index
+    const user = (await db.select().from(users).where(eq(users.email, body['email'] as string)).limit(1))[0]
     if (!user) return c.redirect('/login')
     const passwordIsValid = bcrypt.compareSync(body['password'] as string, user.password)
     if (!passwordIsValid) return c.redirect('/login')
@@ -109,7 +108,5 @@ app.get('/logout', (c) => {
 app.route('/account', account)
 
 app.route('/panel', panel)
-
-await db.sequelize.sync()
 
 export default app
