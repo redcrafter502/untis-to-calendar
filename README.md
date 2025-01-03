@@ -13,7 +13,6 @@ Currently, this project supports anonymous login to Untis.
 To run the backend and to run the frontend you must have [NodeJs](https://nodejs.org) installed and ideally [pnpm](https://pnpm.io/).
 1. Run the command `pnpm install` to install the necessary dependencies.
 2. Create a `.env` file with the following configurations:
-    * Here you can change the port. Example: `PORT=2000`
     * You need to specify an auth secret for jsonwebtoken. Example: `AUTH_SECRET="supersecretsecret"`
     * You need to define an url to be displayed in the ui. Example: `API_URL="http://localhost:3000"`
     * You need to set the data for your instance of PostgreSQL. Example: `DATABASE_URL="postgres://postgres:password@localhost:5432/untis-to-calender"`
