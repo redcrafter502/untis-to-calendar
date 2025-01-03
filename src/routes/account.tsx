@@ -55,7 +55,7 @@ app.post('/change-password', async (c) => {
     const oldPasswordIsValid = bcrypt.compareSync(body['oldPassword'] as string, user.password)
     if (!oldPasswordIsValid) return c.redirect('/account')
     const newPassword = bcrypt.hashSync(body['newPassword'] as string, 10)
-    await db.update(users).set({ password: newPassword }).where(eq(users.userId, id))
+    await db.update(users).set({ password: newPassword, updatedAt: new Date().toISOString() }).where(eq(users.userId, id))
     return c.redirect('/account')
 })
 
