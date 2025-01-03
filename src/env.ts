@@ -2,7 +2,6 @@ import 'dotenv/config'
 import {z} from 'zod'
 
 const envSchema = z.object({
-    PORT: z.string(),
     AUTH_SECRET: z.string(),
     API_URL: z.string().url(),
     DATABASE_URL: z.string().url(),
