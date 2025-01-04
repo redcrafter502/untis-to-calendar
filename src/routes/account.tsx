@@ -7,6 +7,8 @@ import Input from '@/input'
 import {db} from '@/db'
 import {users} from '@/db/schema'
 import {eq} from 'drizzle-orm'
+import {zValidator} from '@hono/zod-validator'
+import {z} from 'zod'
 
 const app = new Hono()
 
@@ -45,19 +47,29 @@ app.get('/', (c) => {
     )
 })
 
-app.post('/change-password', async (c) => {
-    const body = await c.req.parseBody()
-    const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
-    if (!loggedIn) return c.redirect('/')
+app.post(
+    '/change-password',
+    zValidator(
+        'form',
+        z.object({
+            oldPassword: z.string(),
+            newPassword: z.string(),
+        }),
+    ),
+    async (c) => {
+        const body = c.req.valid('form')
+        const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
+        if (!loggedIn) return c.redirect('/')
 
-    // TODO: find a better way than using a zero index
-    const user = (await db.select().from(users).where(eq(users.userId, id)))[0]
-    const oldPasswordIsValid = bcrypt.compareSync(body['oldPassword'] as string, user.password)
-    if (!oldPasswordIsValid) return c.redirect('/account')
-    const newPassword = bcrypt.hashSync(body['newPassword'] as string, 10)
-    await db.update(users).set({ password: newPassword, updatedAt: new Date().toISOString() }).where(eq(users.userId, id))
-    return c.redirect('/account')
-})
+        // TODO: find a better way than using a zero index
+        const user = (await db.select().from(users).where(eq(users.userId, id)))[0]
+        const oldPasswordIsValid = bcrypt.compareSync(body.oldPassword, user.password)
+        if (!oldPasswordIsValid) return c.redirect('/account')
+        const newPassword = bcrypt.hashSync(body.newPassword, 10)
+        await db.update(users).set({ password: newPassword, updatedAt: new Date().toISOString() }).where(eq(users.userId, id))
+        return c.redirect('/account')
+    }
+)
 
 app.post('/delete', async (c) => {
     const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
