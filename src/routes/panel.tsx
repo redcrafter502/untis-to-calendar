@@ -243,13 +243,22 @@ app.get('/:urlId', async (c) => {
     )
 })
 
-app.post('/delete', async (c) => {
-    const body = await c.req.parseBody()
-    const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
-    if (!loggedIn) return c.redirect('/')
+app.post(
+    '/delete',
+    zValidator(
+        'form',
+        z.object({
+            id: z.string(),
+        }),
+    ),
+    async (c) => {
+        const body = c.req.valid('form')
+        const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
+        if (!loggedIn) return c.redirect('/')
 
-    await db.delete(untisAccesses).where(and(eq(untisAccesses.untisAccessId, parseInt(body['id'] as string)), eq(untisAccesses.userId, id)))
-    return c.redirect('/panel')
-})
+        await db.delete(untisAccesses).where(and(eq(untisAccesses.untisAccessId, parseInt(body.id)), eq(untisAccesses.userId, id)))
+        return c.redirect('/panel')
+    }
+)
 
 export default app
