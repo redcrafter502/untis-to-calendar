@@ -181,7 +181,7 @@ app.post(
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         }).returning({ untisAccessId: untisAccesses.untisAccessId }))[0]
-        if (body['type'] === 'public') {
+        if (body.type === 'public') {
             if (!body.classes) return c.redirect('/panel')
             await db.insert(publicUntisAccesses).values({
                 untisAccessId: access.untisAccessId,
