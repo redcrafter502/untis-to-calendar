@@ -8,6 +8,8 @@ import {randomUUID} from 'node:crypto'
 import {db} from '@/db'
 import {privateUntisAccesses, publicUntisAccesses, untisAccesses} from '@/db/schema'
 import {eq, and} from 'drizzle-orm'
+import {zValidator} from '@hono/zod-validator'
+import {z} from 'zod'
 
 const app = new Hono()
 
@@ -57,88 +59,95 @@ app.get('/', (c) => {
     )
 })
 
-app.post('/new', async (c) => {
-    const body = await c.req.parseBody()
-    const [loggedIn] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
-    if (!loggedIn) return c.redirect('/')
-    const type = body['type'] as string
-    const name = body['name'] as string
-    const domain = body['domain'] as string || 'neilo.webuntis.com'
-    const school = body['school'] as string
-    const timezone = body['timezone'] as string || 'Europe/Berlin'
-    if (!(type === 'public' || type === 'private')) return c.redirect('/panel')
+app.post(
+    '/new',
+    zValidator(
+        'form',
+        z.object({
+            type: z.enum(['public', 'private']),
+            name: z.string(),
+            domain: z.string().transform(value => value || 'neilo.webuntis.com'),
+            school: z.string(),
+            timezone: z.string().transform(value => value || 'Europe/Berlin'),
+        }),
+    ),
+    async (c) => {
+        const body = c.req.valid('form')
+        const [loggedIn] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
+        if (!loggedIn) return c.redirect('/')
 
-    let classes = null
-    if (type === 'public') {
-        try {
-            const untis = getWebUntis({ untisAccesses: { school, domain, type: 'public' }})
-            await untis.login()
-            const schoolYear = await untis.getCurrentSchoolyear()
-            classes = await untis.getClasses(true, schoolYear.id)
-            await untis.logout()
-        } catch {
-            return c.redirect('/panel')
+        let classes = null
+        if (body.type === 'public') {
+            try {
+                const untis = getWebUntis({ untisAccesses: { school: body.school, domain: body.domain, type: 'public' }})
+                await untis.login()
+                const schoolYear = await untis.getCurrentSchoolyear()
+                classes = await untis.getClasses(true, schoolYear.id)
+                await untis.logout()
+            } catch {
+                return c.redirect('/panel')
+            }
         }
-    }
 
-    return c.html(
-        <Layout title="Create" loggedIn={true}>
-            <h1>Create</h1>
-            <form action="/panel/new-api" method="post">
-                <div class="form-group">
-                    <label for="type">Type of Timetable</label>
-                    <select disabled name="type" id="type" class="form-select" >
-                        <option selected={type === 'public'} value="public">Public Timetable</option>
-                        <option selected={type === 'private'} value="private">Private Timetable</option>
-                    </select>
-                    <input type="hidden" name="type" id="type" value={type}/>
-                </div>
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input disabled type="text" name="name" id="name" value={name} class="form-control"/>
-                    <input type="hidden" name="name" id="name" value={name}/>
-                </div>
-                <div class="form-group">
-                    <label for="domain">Domain</label>
-                    <input disabled type="text" name="domain" id="domain" value={domain} class="form-control"/>
-                    <input type="hidden" name="domain" id="domain" value={domain}/>
-                </div>
-                <div class="form-group">
-                    <label for="school">School</label>
-                    <input disabled type="text" name="school" id="school" value={school} class="form-control"/>
-                    <input type="hidden" name="school" id="school" value={school}/>
-                </div>
-                <div class="form-group">
-                    <label for="timezone">Timezone</label>
-                    <input disabled type="text" name="timezone" id="timezone" value={timezone} class="form-control"/>
-                    <input type="hidden" name="timezone" id="timezone" value={timezone}/>
-                </div>
-                {(type === 'public') ? (
-                    <div className="form-group mb-3">
-                        <label htmlFor="classes">Select Class</label>
-                        <select name="classes" id="classes" className="form-control">
-                            {classes?.map(c => (
-                                <option value={c.id}>{c.name}</option>
-                            ))}
+        return c.html(
+            <Layout title="Create" loggedIn={true}>
+                <h1>Create</h1>
+                <form action="/panel/new-api" method="post">
+                    <div class="form-group">
+                        <label for="type">Type of Timetable</label>
+                        <select disabled name="type" id="type" class="form-select" >
+                            <option selected={body.type === 'public'} value="public">Public Timetable</option>
+                            <option selected={body.type === 'private'} value="private">Private Timetable</option>
                         </select>
+                        <input type="hidden" name="type" id="type" value={body.type}/>
                     </div>
-                ) : (
-                    <>
-                        <div class="alert alert-warning mt-3" role="alert">
-                            Warning! Your personal username and password will be stored on this instance of untis-to-calendar. Make sure you trust this instance before giving your data!
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input disabled type="text" name="name" id="name" value={body.name} class="form-control"/>
+                        <input type="hidden" name="name" id="name" value={body.name}/>
+                    </div>
+                    <div class="form-group">
+                        <label for="domain">Domain</label>
+                        <input disabled type="text" name="domain" id="domain" value={body.domain} class="form-control"/>
+                        <input type="hidden" name="domain" id="domain" value={body.domain}/>
+                    </div>
+                    <div class="form-group">
+                        <label for="school">School</label>
+                        <input disabled type="text" name="school" id="school" value={body.school} class="form-control"/>
+                        <input type="hidden" name="school" id="school" value={body.school}/>
+                    </div>
+                    <div class="form-group">
+                        <label for="timezone">Timezone</label>
+                        <input disabled type="text" name="timezone" id="timezone" value={body.timezone} class="form-control"/>
+                        <input type="hidden" name="timezone" id="timezone" value={body.timezone}/>
+                    </div>
+                    {(body.type === 'public') ? (
+                        <div className="form-group mb-3">
+                            <label htmlFor="classes">Select Class</label>
+                            <select name="classes" id="classes" className="form-control">
+                                {classes?.map(c => (
+                                    <option value={c.id}>{c.name}</option>
+                                ))}
+                            </select>
                         </div>
-                        <Input id="username" label="Untis Username" type="text" required/>
-                        <Input id="password" label="Untis Password" type="password" required/>
-                    </>
-                )}
-                <div class="mt-3">
-                    <a href="/panel" class="btn btn-warning">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Create</button>
-                </div>
-            </form>
-        </Layout>
-    )
-})
+                    ) : (
+                        <>
+                            <div class="alert alert-warning mt-3" role="alert">
+                                Warning! Your personal username and password will be stored on this instance of untis-to-calendar. Make sure you trust this instance before giving your data!
+                            </div>
+                            <Input id="username" label="Untis Username" type="text" required/>
+                            <Input id="password" label="Untis Password" type="password" required/>
+                        </>
+                    )}
+                    <div class="mt-3">
+                        <a href="/panel" class="btn btn-warning">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </Layout>
+        )
+    }
+)
 
 app.post('/new-api', async (c) => {
     const body = await c.req.parseBody()
