@@ -14,6 +14,8 @@ import panel from '@/routes/panel'
 import {db} from '@/db'
 import {privateUntisAccesses, publicUntisAccesses, untisAccesses, users} from '@/db/schema'
 import {eq} from 'drizzle-orm'
+import {zValidator} from '@hono/zod-validator'
+import {z} from 'zod'
 
 const TWENTY_FOUR_HOURS_IN_SECONDS = 86400
 const NUMBER_OF_MILLISECONDS_IN_A_SECOND = 1000
@@ -80,25 +82,35 @@ app.get('/login', (c) => {
     )
 })
 
-app.post('/login-api', async (c) => {
-    const body = await c.req.parseBody()
-    // TODO: find a better way than using a zero index
-    const user = (await db.select().from(users).where(eq(users.email, body['email'] as string)).limit(1))[0]
-    if (!user) return c.redirect('/login')
-    const passwordIsValid = bcrypt.compareSync(body['password'] as string, user.password)
-    if (!passwordIsValid) return c.redirect('/login')
+app.post(
+    '/login-api',
+    zValidator(
+        'form',
+        z.object({
+            email: z.string().email(),
+            password: z.string(),
+        }),
+    ),
+    async (c) => {
+        const body = c.req.valid('form')
+        // TODO: find a better way than using a zero index
+        const user = (await db.select().from(users).where(eq(users.email, body.email)).limit(1))[0]
+        if (!user) return c.redirect('/login')
+        const passwordIsValid = bcrypt.compareSync(body.password, user.password)
+        if (!passwordIsValid) return c.redirect('/login')
 
-    const token = jwt.sign({id: user.userId}, process.env.AUTH_SECRET, {
-        expiresIn: TWENTY_FOUR_HOURS_IN_SECONDS
-    })
-    setCookie(c, AUTH_COOKIE_NAME, token, {
-        secure: true,
-        httpOnly: true,
-        sameSite: 'Strict',
-        expires: new Date(Date.now() + TWENTY_FOUR_HOURS_IN_SECONDS * NUMBER_OF_MILLISECONDS_IN_A_SECOND),
-    })
-    return c.redirect('/panel')
-})
+        const token = jwt.sign({id: user.userId}, process.env.AUTH_SECRET, {
+            expiresIn: TWENTY_FOUR_HOURS_IN_SECONDS
+        })
+        setCookie(c, AUTH_COOKIE_NAME, token, {
+            secure: true,
+            httpOnly: true,
+            sameSite: 'Strict',
+            expires: new Date(Date.now() + TWENTY_FOUR_HOURS_IN_SECONDS * NUMBER_OF_MILLISECONDS_IN_A_SECOND),
+        })
+        return c.redirect('/panel')
+    }
+)
 
 app.get('/logout', (c) => {
     deleteCookie(c, AUTH_COOKIE_NAME)
