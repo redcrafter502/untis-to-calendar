@@ -1,4 +1,3 @@
-import '@/env'
 import ics from 'ics'
 import { getEvents } from '@/services/untis'
 import { Hono } from 'hono'

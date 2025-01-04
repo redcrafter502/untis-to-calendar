@@ -14,6 +14,7 @@ import {
 import { eq, and } from 'drizzle-orm'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
+import { env } from '@/env'
 
 const app = new Hono()
 
@@ -30,7 +31,7 @@ const UntisAccessesList = async (props: { id: number }) => {
         {usersUntisAccesses.length === 1 ? '' : 'es'}
       </p>
       {usersUntisAccesses.map((untisAccess) => {
-        const url = `${process.env.API_URL}/ics/${untisAccess.urlId}`
+        const url = `${env.API_URL}/ics/${untisAccess.urlId}`
         return (
           <div>
             <h4>
@@ -321,7 +322,7 @@ app.get('/:urlId', async (c) => {
       .where(and(eq(untisAccesses.urlId, urlId), eq(untisAccesses.userId, id)))
   )[0]
 
-  const url = `${process.env.API_URL}/ics/${untisAccess.untisAccesses.urlId}`
+  const url = `${env.API_URL}/ics/${untisAccess.untisAccesses.urlId}`
 
   return c.html(
     <Layout title={untisAccess.untisAccesses.name} loggedIn={true}>

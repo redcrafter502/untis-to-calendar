@@ -10,6 +10,7 @@ import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { Hono } from 'hono'
+import { env } from '@/env'
 
 const TWENTY_FOUR_HOURS_IN_SECONDS = 86400
 const NUMBER_OF_MILLISECONDS_IN_A_SECOND = 1000
@@ -52,7 +53,7 @@ app.post(
     const passwordIsValid = bcrypt.compareSync(body.password, user.password)
     if (!passwordIsValid) return c.redirect('/login')
 
-    const token = jwt.sign({ id: user.userId }, process.env.AUTH_SECRET, {
+    const token = jwt.sign({ id: user.userId }, env.AUTH_SECRET, {
       expiresIn: TWENTY_FOUR_HOURS_IN_SECONDS,
     })
     setCookie(c, AUTH_COOKIE_NAME, token, {

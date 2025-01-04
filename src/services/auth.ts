@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import { env } from '@/env'
 
 export const isLoggedIn = (
   authSession: string | undefined,
@@ -6,7 +7,7 @@ export const isLoggedIn = (
   if (!authSession) return [false, undefined]
 
   try {
-    const decoded = jwt.verify(authSession, process.env.AUTH_SECRET) as {
+    const decoded = jwt.verify(authSession, env.AUTH_SECRET) as {
       id: number
     }
     return [true, decoded.id]
