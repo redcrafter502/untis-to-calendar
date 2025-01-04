@@ -169,7 +169,6 @@ app.post(
         const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
         if (!loggedIn) return c.redirect('/panel')
         const urlId = randomUUID()
-        // TODO: find a better way than using a zero index
         const access = (await db.insert(untisAccesses).values({
             name: body.name,
             domain: body.domain,
@@ -204,7 +203,6 @@ app.get('/:urlId', async (c) => {
     const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
     if (!loggedIn) return c.redirect('/')
 
-    // TODO: find a better way than using a zero index
     const untisAccess = (await db.select()
         .from(untisAccesses)
         .leftJoin(privateUntisAccesses, eq(untisAccesses.untisAccessId, privateUntisAccesses.untisAccessId))
