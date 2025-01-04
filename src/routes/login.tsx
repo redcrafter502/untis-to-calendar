@@ -43,7 +43,6 @@ app.post(
     ),
     async (c) => {
         const body = c.req.valid('form')
-        // TODO: find a better way than using a zero index
         const user = (await db.select().from(users).where(eq(users.email, body.email)).limit(1))[0]
         if (!user) return c.redirect('/login')
         const passwordIsValid = bcrypt.compareSync(body.password, user.password)

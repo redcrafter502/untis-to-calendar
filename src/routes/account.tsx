@@ -13,7 +13,6 @@ import {z} from 'zod'
 const app = new Hono()
 
 const AccountInfo = async (props: { id: number }) => {
-    // TODO: find a better way than using a zero index
     const user = (await db.select().from(users).where(eq(users.userId, props.id)))[0]
 
     return (
@@ -61,7 +60,6 @@ app.post(
         const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
         if (!loggedIn) return c.redirect('/')
 
-        // TODO: find a better way than using a zero index
         const user = (await db.select().from(users).where(eq(users.userId, id)))[0]
         const oldPasswordIsValid = bcrypt.compareSync(body.oldPassword, user.password)
         if (!oldPasswordIsValid) return c.redirect('/account')
