@@ -149,38 +149,55 @@ app.post(
     }
 )
 
-app.post('/new-api', async (c) => {
-    const body = await c.req.parseBody()
-    const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
-    if (!loggedIn) return c.redirect('/panel')
-    if (!(body['type'] === 'public' || body['type'] === 'private')) return c.redirect('/panel')
-    const urlId = randomUUID()
-    // TODO: find a better way than using a zero index
-    const access = (await db.insert(untisAccesses).values({
-        name: body['name'] as string,
-        domain: body['domain'] as string,
-        school: body['school'] as string,
-        timezone: body['timezone'] as string,
-        type: body['type'] as 'public' | 'private',
-        urlId,
-        userId: id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    }).returning({ untisAccessId: untisAccesses.untisAccessId }))[0]
-    if (body['type'] === 'public') {
-        await db.insert(publicUntisAccesses).values({
-            untisAccessId: access.untisAccessId,
-            classId: body['classes'] as string,
-        })
-    } else {
-        await db.insert(privateUntisAccesses).values({
-            untisAccessId: access.untisAccessId,
-            username: body['username'] as string,
-            password: body['password'] as string,
-        })
+app.post(
+    '/new-api',
+    zValidator(
+        'form',
+        z.object({
+            type: z.enum(['public', 'private']),
+            name: z.string(),
+            domain: z.string(),
+            school: z.string(),
+            timezone: z.string(),
+            classes: z.string().optional(),
+            username: z.string().optional(),
+            password: z.string().optional(),
+        }),
+    ),
+    async (c) => {
+        const body = c.req.valid('form')
+        const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
+        if (!loggedIn) return c.redirect('/panel')
+        const urlId = randomUUID()
+        // TODO: find a better way than using a zero index
+        const access = (await db.insert(untisAccesses).values({
+            name: body.name,
+            domain: body.domain,
+            school: body.school,
+            timezone: body.timezone,
+            type: body.type,
+            urlId,
+            userId: id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        }).returning({ untisAccessId: untisAccesses.untisAccessId }))[0]
+        if (body['type'] === 'public') {
+            if (!body.classes) return c.redirect('/panel')
+            await db.insert(publicUntisAccesses).values({
+                untisAccessId: access.untisAccessId,
+                classId: body.classes,
+            })
+        } else {
+            if (!body.username || !body.password) return c.redirect('/panel')
+            await db.insert(privateUntisAccesses).values({
+                untisAccessId: access.untisAccessId,
+                username: body.username,
+                password: body.password,
+            })
+        }
+        return c.redirect(`/panel/${urlId}`)
     }
-    return c.redirect(`/panel/${urlId}`)
-})
+)
 
 app.get('/:urlId', async (c) => {
     const urlId = c.req.param('urlId')
