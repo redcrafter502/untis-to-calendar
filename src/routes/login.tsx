@@ -1,7 +1,7 @@
 import {AUTH_COOKIE_NAME, isLoggedIn} from '@/services/auth'
 import {getCookie, setCookie} from 'hono/cookie'
 import Layout from '@/layout'
-import Input from '@/input'
+import Input from '@/components/input'
 import {zValidator} from '@hono/zod-validator'
 import {z} from 'zod'
 import {db} from '@/db'
