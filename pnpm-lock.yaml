@@ -72,6 +72,9 @@ importers:
       glob:
         specifier: ^11.0.0
         version: 11.0.0
+      prettier:
+        specifier: 3.4.2
+        version: 3.4.2
       tsc-alias:
         specifier: ^1.8.10
         version: 1.8.10
@@ -2299,6 +2302,11 @@ packages:
   preserve@0.2.0:
     resolution: {integrity: sha512-s/46sYeylUfHNjI+sA/78FAHlmIuKqI9wNnzEOGehAlUUYeObv5C2mOinXBjyUyWmJ2SfcS2/ydApH4hTF4WXQ==}
     engines: {node: '>=0.10.0'}
+
+  prettier@3.4.2:
+    resolution: {integrity: sha512-e9MewbtFo+Fevyuxn/4rrcDAaq0IYxPGLvObpQjiZBMAzB9IGmzlnG9RZy3FFas+eBMu2vA0CszMeduow5dIuQ==}
+    engines: {node: '>=14'}
+    hasBin: true
 
   pretty-ms@7.0.1:
     resolution: {integrity: sha512-973driJZvxiGOQ5ONsFhOF/DtzPMOMtgC11kCpUrPGMTgqp2q/1gwzCquocrN33is0VZ5GFHXZYMM9l6h67v2Q==}
@@ -4797,6 +4805,8 @@ snapshots:
   postgres-range@1.1.4: {}
 
   preserve@0.2.0: {}
+
+  prettier@3.4.2: {}
 
   pretty-ms@7.0.1:
     dependencies:
