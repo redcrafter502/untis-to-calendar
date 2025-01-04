@@ -141,7 +141,7 @@ app.post(
                     )}
                     <div class="mt-3">
                         <a href="/panel" class="btn btn-warning">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Create</button>
+                        <button type="submit" class="btn btn-primary  m-lg-2">Create</button>
                     </div>
                 </form>
             </Layout>
