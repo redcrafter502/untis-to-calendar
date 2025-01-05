@@ -80,6 +80,12 @@ app.get('/', (c) => {
             placeholder="Europe/Berlin"
             type="text"
           />
+          <input
+            id="defaultTimezone"
+            name="defaultTimezone"
+            value="Europe/Berlin"
+            type="hidden"
+          />
           <button type="submit" class="mt-3 btn btn-primary">
             Create
           </button>

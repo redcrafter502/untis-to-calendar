@@ -47,10 +47,12 @@ if (newPasswordInput && newPasswordConfirmedInput) {
 }
 
 const timezoneInput = document.getElementById('timezone')
+const defaultTimezoneInput = document.getElementById('defaultTimezone')
 
-if (timezoneInput) {
+if (timezoneInput && defaultTimezoneInput) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
   if (timezone) {
     timezoneInput.placeholder = timezone
+    defaultTimezoneInput.value = timezone
   }
 }
