@@ -50,5 +50,5 @@ const timezoneInput = document.getElementById('timezone')
 
 if (timezoneInput) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-  console.log('TIMEZONE', timezone)
+  timezoneInput.placeholder = timezone
 }
