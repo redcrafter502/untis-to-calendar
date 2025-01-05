@@ -56,6 +56,8 @@ app.get('/', (c) => {
   const [loggedIn, id] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
   if (!loggedIn) return c.redirect('/')
 
+  const defaultTimezone = 'Europe/Berlin'
+
   return c.html(
     <Layout title="Panel" loggedIn={true} active="PANEL">
       <h2>Create UntisAccess</h2>
@@ -77,13 +79,13 @@ app.get('/', (c) => {
           <Input
             id="timezone"
             label="Timezone"
-            placeholder="Europe/Berlin"
+            placeholder={defaultTimezone}
             type="text"
           />
           <input
             id="defaultTimezone"
             name="defaultTimezone"
-            value="Europe/Berlin"
+            value={defaultTimezone}
             type="hidden"
           />
           <button type="submit" class="mt-3 btn btn-primary">
