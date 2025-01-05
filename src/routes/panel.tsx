@@ -74,7 +74,12 @@ app.get('/', (c) => {
             type="text"
           />
           <Input id="school" label="School" type="text" required />
-          <Input id="timezone" label="Timezone" type="text" />
+          <Input
+            id="timezone"
+            label="Timezone"
+            placeholder="Europe/Berlin"
+            type="text"
+          />
           <button type="submit" class="mt-3 btn btn-primary">
             Create
           </button>
