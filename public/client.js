@@ -46,5 +46,9 @@ if (newPasswordInput && newPasswordConfirmedInput) {
   })
 }
 
-const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-console.log(timezone)
+const timezoneInput = document.getElementById('timezone')
+
+if (timezoneInput) {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  console.log('TIMEZONE', timezone)
+}
