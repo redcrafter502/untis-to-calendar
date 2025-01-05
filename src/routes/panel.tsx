@@ -108,13 +108,16 @@ app.post(
       name: z.string(),
       domain: z.string().transform((value) => value || 'neilo.webuntis.com'),
       school: z.string(),
-      timezone: z.string().transform((value) => value || 'Europe/Berlin'),
+      timezone: z.string().optional(), //.transform((value) => value || 'Europe/Berlin'),
+      defaultTimezone: z.string(),
     }),
   ),
   async (c) => {
     const body = c.req.valid('form')
     const [loggedIn] = isLoggedIn(getCookie(c, AUTH_COOKIE_NAME))
     if (!loggedIn) return c.redirect('/')
+
+    const timezone = body.timezone || body.defaultTimezone
 
     let classes = null
     if (body.type === 'public') {
@@ -204,14 +207,14 @@ app.post(
               type="text"
               name="timezone"
               id="timezone"
-              value={body.timezone}
+              value={timezone}
               class="form-control"
             />
             <input
               type="hidden"
               name="timezone"
               id="timezone"
-              value={body.timezone}
+              value={timezone}
             />
           </div>
           {body.type === 'public' ? (
