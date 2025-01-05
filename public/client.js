@@ -45,3 +45,6 @@ if (newPasswordInput && newPasswordConfirmedInput) {
     })
   })
 }
+
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+console.log(timezone)
