@@ -3,7 +3,8 @@ import {
   users,
   untisAccesses,
   publicUntisAccesses,
-  privateUntisAccesses,
+  passwordUntisAccesses,
+  secretUntisAccesses,
 } from '@/db/schema'
 
 export const untisAccessesRelations = relations(
@@ -14,7 +15,8 @@ export const untisAccessesRelations = relations(
       references: [users.userId],
     }),
     publicUntisAccesses: many(publicUntisAccesses),
-    privateUntisAccesses: many(privateUntisAccesses),
+    passwordUntisAccesses: many(passwordUntisAccesses),
+    secretUntisAccesses: many(secretUntisAccesses),
   }),
 )
 
@@ -32,11 +34,21 @@ export const publicUntisAccessesRelations = relations(
   }),
 )
 
-export const privateUntisAccessesRelations = relations(
-  privateUntisAccesses,
+export const passwordUntisAccessesRelations = relations(
+  passwordUntisAccesses,
   ({ one }) => ({
     untisAccess: one(untisAccesses, {
-      fields: [privateUntisAccesses.untisAccessId],
+      fields: [passwordUntisAccesses.untisAccessId],
+      references: [untisAccesses.untisAccessId],
+    }),
+  }),
+)
+
+export const secretUntisAccessesRelations = relations(
+  secretUntisAccesses,
+  ({ one }) => ({
+    untisAccess: one(untisAccesses, {
+      fields: [secretUntisAccesses.untisAccessId],
       references: [untisAccesses.untisAccessId],
     }),
   }),
