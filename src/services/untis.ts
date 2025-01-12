@@ -23,7 +23,7 @@ const getCurrentAndNextWeekRange = () => {
 
 type UntisAccessOrPublicData = {
   untisAccesses: {
-    type: 'public' | 'private'
+    type: 'public' | 'password' | 'secret'
     untisAccessId?: number
     userId?: number
     name?: string
@@ -34,7 +34,7 @@ type UntisAccessOrPublicData = {
     createdAt?: string
     updatedAt?: string
   }
-  privateUntisAccesses?: {
+  passwordUntisAccesses?: {
     untisAccessId: number
     password: string
     username: string
@@ -47,13 +47,13 @@ type UntisAccessOrPublicData = {
 
 export const getWebUntis = (untisAccess: UntisAccessOrPublicData) => {
   if (
-    untisAccess.untisAccesses.type === 'private' &&
-    untisAccess.privateUntisAccesses
+    untisAccess.untisAccesses.type === 'password' &&
+    untisAccess.passwordUntisAccesses
   ) {
     return new webuntis.WebUntis(
       untisAccess.untisAccesses.school,
-      untisAccess.privateUntisAccesses.username,
-      untisAccess.privateUntisAccesses.password,
+      untisAccess.passwordUntisAccesses.username,
+      untisAccess.passwordUntisAccesses.password,
       untisAccess.untisAccesses.domain,
     )
   } else {
@@ -149,7 +149,7 @@ const getTimetable = async (
 
 type UntisAccess = {
   untisAccesses: {
-    type: 'public' | 'private'
+    type: 'public' | 'password' | 'secret'
     untisAccessId: number
     userId: number
     name: string
@@ -160,7 +160,7 @@ type UntisAccess = {
     createdAt: string
     updatedAt: string
   }
-  privateUntisAccesses: {
+  passwordUntisAccesses: {
     untisAccessId: number
     password: string
     username: string
@@ -205,7 +205,7 @@ export const getEvents = async (untisAccess: UntisAccess) => {
     transp: string
     calName: any
   }[] = []
-  if (untisAccess.untisAccesses.type === 'private') {
+  if (untisAccess.untisAccesses.type === 'password') {
     // @ts-ignore
     homework = await untis.getHomeWorksFor(startOfCurrentWeek, endOfNextWeek)
 

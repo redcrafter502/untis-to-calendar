@@ -7,7 +7,7 @@ import { getWebUntis } from '@/services/untis'
 import { randomUUID } from 'node:crypto'
 import { db } from '@/db'
 import {
-  privateUntisAccesses,
+  passwordUntisAccesses,
   publicUntisAccesses,
   untisAccesses,
 } from '@/db/schema'
@@ -66,7 +66,7 @@ app.get('/', (c) => {
           <label for="type">Type of Timetable</label>
           <select required name="type" id="type" class="form-select">
             <option value="public">Public Timetable</option>
-            <option value="private">Private Timetable</option>
+            <option value="password">Password Timetable</option>
           </select>
           <Input id="name" label="Name" type="text" required />
           <Input
@@ -104,7 +104,7 @@ app.post(
   zValidator(
     'form',
     z.object({
-      type: z.enum(['public', 'private']),
+      type: z.enum(['public', 'password', 'secret']),
       name: z.string(),
       domain: z.string().transform((value) => value || 'neilo.webuntis.com'),
       school: z.string(),
@@ -148,8 +148,8 @@ app.post(
               <option selected={body.type === 'public'} value="public">
                 Public Timetable
               </option>
-              <option selected={body.type === 'private'} value="private">
-                Private Timetable
+              <option selected={body.type === 'password'} value="password">
+                Password Timetable
               </option>
             </select>
             <input type="hidden" name="type" id="type" value={body.type} />
@@ -264,7 +264,7 @@ app.post(
   zValidator(
     'form',
     z.object({
-      type: z.enum(['public', 'private']),
+      type: z.enum(['public', 'password', 'secret']),
       name: z.string(),
       domain: z.string(),
       school: z.string(),
@@ -303,7 +303,7 @@ app.post(
       })
     } else {
       if (!body.username || !body.password) return c.redirect('/panel')
-      await db.insert(privateUntisAccesses).values({
+      await db.insert(passwordUntisAccesses).values({
         untisAccessId: access.untisAccessId,
         username: body.username,
         password: body.password,
@@ -323,8 +323,8 @@ app.get('/:urlId', async (c) => {
       .select()
       .from(untisAccesses)
       .leftJoin(
-        privateUntisAccesses,
-        eq(untisAccesses.untisAccessId, privateUntisAccesses.untisAccessId),
+        passwordUntisAccesses,
+        eq(untisAccesses.untisAccessId, passwordUntisAccesses.untisAccessId),
       )
       .leftJoin(
         publicUntisAccesses,
@@ -355,11 +355,11 @@ app.get('/:urlId', async (c) => {
           <p>Type: Public Timetable</p>
           <p>ClassID: {untisAccess.publicUntisAccesses.classId}</p>
         </>
-      ) : untisAccess.privateUntisAccesses ? (
+      ) : untisAccess.passwordUntisAccesses ? (
         <>
-          <p>Type: Private Timetable</p>
-          <p>Untis Username: {untisAccess.privateUntisAccesses.username}</p>
-          <p>Untis Password: {untisAccess.privateUntisAccesses.password}</p>
+          <p>Type: Password Timetable</p>
+          <p>Untis Username: {untisAccess.passwordUntisAccesses.username}</p>
+          <p>Untis Password: {untisAccess.passwordUntisAccesses.password}</p>
         </>
       ) : (
         'DB SCHEMA ERROR: field type and existing relations do not match'

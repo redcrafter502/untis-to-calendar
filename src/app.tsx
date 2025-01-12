@@ -8,7 +8,7 @@ import { AUTH_COOKIE_NAME, isLoggedIn } from '@/services/auth'
 import panel from '@/routes/panel'
 import { db } from '@/db'
 import {
-  privateUntisAccesses,
+  passwordUntisAccesses,
   publicUntisAccesses,
   untisAccesses,
   users,
@@ -28,8 +28,8 @@ app.get('/ics/:id', async (c) => {
       .select()
       .from(untisAccesses)
       .leftJoin(
-        privateUntisAccesses,
-        eq(untisAccesses.untisAccessId, privateUntisAccesses.untisAccessId),
+        passwordUntisAccesses,
+        eq(untisAccesses.untisAccessId, passwordUntisAccesses.untisAccessId),
       )
       .leftJoin(
         publicUntisAccesses,
