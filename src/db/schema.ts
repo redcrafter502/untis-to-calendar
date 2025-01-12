@@ -11,7 +11,8 @@ import {
 
 export const enumUntisAccessesType = pgEnum('enum_untisAccesses_type', [
   'public',
-  'private',
+  'password',
+  'secret',
 ])
 
 export const users = pgTable(
@@ -69,8 +70,8 @@ export const publicUntisAccesses = pgTable(
   ],
 )
 
-export const privateUntisAccesses = pgTable(
-  'privateUntisAccesses',
+export const passwordUntisAccesses = pgTable(
+  'passwordUntisAccesses',
   {
     untisAccessId: integer().primaryKey().notNull(),
     username: varchar({ length: 255 }).notNull(),
@@ -80,7 +81,25 @@ export const privateUntisAccesses = pgTable(
     foreignKey({
       columns: [table.untisAccessId],
       foreignColumns: [untisAccesses.untisAccessId],
-      name: 'privateUntisAccesses_untisAccessId_fkey',
+      name: 'passwordUntisAccesses_untisAccessId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
+  ],
+)
+
+export const secretUntisAccesses = pgTable(
+  'secretUntisAccesses',
+  {
+    untisAccessId: integer().primaryKey().notNull(),
+    username: varchar({ length: 255 }).notNull(),
+    secret: varchar({ length: 255 }).notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.untisAccessId],
+      foreignColumns: [untisAccesses.untisAccessId],
+      name: 'secretUntisAccesses_untisAccessId_fkey',
     })
       .onUpdate('cascade')
       .onDelete('cascade'),
