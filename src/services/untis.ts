@@ -52,8 +52,6 @@ type UntisAccessOrPublicData = {
 }
 
 export const getWebUntis = (untisAccess: UntisAccessOrPublicData) => {
-  console.log('untis', untisAccess)
-
   switch (untisAccess.untisAccesses.type) {
     case 'public':
       return new webuntis.WebUntisAnonymousAuth(
@@ -77,23 +75,6 @@ export const getWebUntis = (untisAccess: UntisAccessOrPublicData) => {
         Authenticator,
       )
   }
-
-  /*if (
-    untisAccess.untisAccesses.type === 'password' &&
-    untisAccess.passwordUntisAccesses
-  ) {
-    return new webuntis.WebUntis(
-      untisAccess.untisAccesses.school,
-      untisAccess.passwordUntisAccesses.username,
-      untisAccess.passwordUntisAccesses.password,
-      untisAccess.untisAccesses.domain,
-    )
-  } else {
-    return new webuntis.WebUntisAnonymousAuth(
-      untisAccess.untisAccesses.school,
-      untisAccess.untisAccesses.domain,
-    )
-  }*/
 }
 
 const getPublicTimetable = async (
