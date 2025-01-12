@@ -1,5 +1,6 @@
 import webuntis from 'webuntis'
 import momentTimezone from 'moment-timezone'
+import { authenticator as Authenticator } from 'otplib'
 
 const parseTime = (time: number) => {
   const hour = Math.floor(time / 100)
@@ -39,6 +40,11 @@ type UntisAccessOrPublicData = {
     password: string
     username: string
   } | null
+  secretUntisAccesses?: {
+    untisAccessId: number
+    secret: string
+    username: string
+  } | null
   publicUntisAccesses?: {
     untisAccessId: number
     classId: string
@@ -46,7 +52,33 @@ type UntisAccessOrPublicData = {
 }
 
 export const getWebUntis = (untisAccess: UntisAccessOrPublicData) => {
-  if (
+  console.log('untis', untisAccess)
+
+  switch (untisAccess.untisAccesses.type) {
+    case 'public':
+      return new webuntis.WebUntisAnonymousAuth(
+        untisAccess.untisAccesses.school,
+        untisAccess.untisAccesses.domain,
+      )
+    case 'password':
+      return new webuntis.WebUntis(
+        untisAccess.untisAccesses.school,
+        untisAccess.passwordUntisAccesses?.username!,
+        untisAccess.passwordUntisAccesses?.password!,
+        untisAccess.untisAccesses.domain,
+      )
+    case 'secret':
+      return new webuntis.WebUntisSecretAuth(
+        untisAccess.untisAccesses.school,
+        untisAccess.secretUntisAccesses?.username!,
+        untisAccess.secretUntisAccesses?.secret!,
+        untisAccess.untisAccesses.domain,
+        'custom-identity',
+        Authenticator,
+      )
+  }
+
+  /*if (
     untisAccess.untisAccesses.type === 'password' &&
     untisAccess.passwordUntisAccesses
   ) {
@@ -61,7 +93,7 @@ export const getWebUntis = (untisAccess: UntisAccessOrPublicData) => {
       untisAccess.untisAccesses.school,
       untisAccess.untisAccesses.domain,
     )
-  }
+  }*/
 }
 
 const getPublicTimetable = async (
@@ -169,6 +201,11 @@ type UntisAccess = {
     untisAccessId: number
     classId: string
   } | null
+  secretUntisAccesses?: {
+    untisAccessId: number
+    secret: string
+    username: string
+  } | null
 }
 
 export const getEvents = async (untisAccess: UntisAccess) => {
@@ -205,7 +242,10 @@ export const getEvents = async (untisAccess: UntisAccess) => {
     transp: string
     calName: any
   }[] = []
-  if (untisAccess.untisAccesses.type === 'password') {
+  if (
+    untisAccess.untisAccesses.type === 'password' ||
+    untisAccess.untisAccesses.type === 'secret'
+  ) {
     // @ts-ignore
     homework = await untis.getHomeWorksFor(startOfCurrentWeek, endOfNextWeek)
 

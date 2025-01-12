@@ -10,6 +10,7 @@ import { db } from '@/db'
 import {
   passwordUntisAccesses,
   publicUntisAccesses,
+  secretUntisAccesses,
   untisAccesses,
   users,
 } from '@/db/schema'
@@ -27,6 +28,10 @@ app.get('/ics/:id', async (c) => {
     await db
       .select()
       .from(untisAccesses)
+      .leftJoin(
+        secretUntisAccesses,
+        eq(untisAccesses.untisAccessId, secretUntisAccesses.untisAccessId),
+      )
       .leftJoin(
         passwordUntisAccesses,
         eq(untisAccesses.untisAccessId, passwordUntisAccesses.untisAccessId),
