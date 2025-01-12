@@ -9,6 +9,7 @@ import { db } from '@/db'
 import {
   passwordUntisAccesses,
   publicUntisAccesses,
+  secretUntisAccesses,
   untisAccesses,
 } from '@/db/schema'
 import { eq, and } from 'drizzle-orm'
@@ -67,6 +68,7 @@ app.get('/', (c) => {
           <select required name="type" id="type" class="form-select">
             <option value="public">Public Timetable</option>
             <option value="password">Password Timetable</option>
+            <option value="secret">Secret Timetable</option>
           </select>
           <Input id="name" label="Name" type="text" required />
           <Input
@@ -151,6 +153,9 @@ app.post(
               <option selected={body.type === 'password'} value="password">
                 Password Timetable
               </option>
+              <option selected={body.type === 'secret'} value="secret">
+                Secret Password
+              </option>
             </select>
             <input type="hidden" name="type" id="type" value={body.type} />
           </div>
@@ -224,12 +229,13 @@ app.post(
                 {classes?.map((c) => <option value={c.id}>{c.name}</option>)}
               </select>
             </div>
-          ) : (
+          ) : body.type === 'password' ? (
             <>
-              <div class="alert alert-warning mt-3" role="alert">
+              <div class="alert alert-danger mt-3" role="alert">
                 Warning! Your personal username and password will be stored on
                 this instance of untis-to-calendar. Make sure you trust this
-                instance before giving your data!
+                instance before giving your data! Consider using your Untis
+                Secret instead!
               </div>
               <Input
                 id="username"
@@ -240,6 +246,28 @@ app.post(
               <Input
                 id="password"
                 label="Untis Password"
+                type="password"
+                required
+              />
+            </>
+          ) : (
+            <>
+              <div class="alert alert-warning mt-3" role="alert">
+                You need to insert your Untis Secret in this form. It will be
+                stored in this instance of untis-to-calendar. Make sure to trust
+                it before giving your data! This is the option recommended
+                instead of using your username and password because you can
+                reset your secret at anytime in your Untis Account.
+              </div>
+              <Input
+                id="username"
+                label="Untis Username"
+                type="text"
+                required
+              />
+              <Input
+                id="secret"
+                label="Untis Secret"
                 type="password"
                 required
               />
@@ -272,6 +300,7 @@ app.post(
       classes: z.string().optional(),
       username: z.string().optional(),
       password: z.string().optional(),
+      secret: z.string().optional(),
     }),
   ),
   async (c) => {
@@ -295,20 +324,33 @@ app.post(
         })
         .returning({ untisAccessId: untisAccesses.untisAccessId })
     )[0]
-    if (body.type === 'public') {
-      if (!body.classes) return c.redirect('/panel')
-      await db.insert(publicUntisAccesses).values({
-        untisAccessId: access.untisAccessId,
-        classId: body.classes,
-      })
-    } else {
-      if (!body.username || !body.password) return c.redirect('/panel')
-      await db.insert(passwordUntisAccesses).values({
-        untisAccessId: access.untisAccessId,
-        username: body.username,
-        password: body.password,
-      })
+
+    switch (body.type) {
+      case 'public':
+        if (!body.classes) return c.redirect('/panel')
+        await db.insert(publicUntisAccesses).values({
+          untisAccessId: access.untisAccessId,
+          classId: body.classes,
+        })
+        break
+      case 'password':
+        if (!body.username || !body.password) return c.redirect('/panel')
+        await db.insert(passwordUntisAccesses).values({
+          untisAccessId: access.untisAccessId,
+          username: body.username,
+          password: body.password,
+        })
+        break
+      case 'secret':
+        if (!body.username || !body.secret) return c.redirect('/panel')
+        await db.insert(secretUntisAccesses).values({
+          untisAccessId: access.untisAccessId,
+          username: body.username,
+          secret: body.secret,
+        })
+        break
     }
+
     return c.redirect(`/panel/${urlId}`)
   },
 )
@@ -322,6 +364,10 @@ app.get('/:urlId', async (c) => {
     await db
       .select()
       .from(untisAccesses)
+      .leftJoin(
+        secretUntisAccesses,
+        eq(untisAccesses.untisAccessId, secretUntisAccesses.untisAccessId),
+      )
       .leftJoin(
         passwordUntisAccesses,
         eq(untisAccesses.untisAccessId, passwordUntisAccesses.untisAccessId),
@@ -355,11 +401,19 @@ app.get('/:urlId', async (c) => {
           <p>Type: Public Timetable</p>
           <p>ClassID: {untisAccess.publicUntisAccesses.classId}</p>
         </>
-      ) : untisAccess.passwordUntisAccesses ? (
+      ) : untisAccess.untisAccesses.type === 'password' &&
+        untisAccess.passwordUntisAccesses ? (
         <>
           <p>Type: Password Timetable</p>
           <p>Untis Username: {untisAccess.passwordUntisAccesses.username}</p>
           <p>Untis Password: {untisAccess.passwordUntisAccesses.password}</p>
+        </>
+      ) : untisAccess.untisAccesses.type === 'secret' &&
+        untisAccess.secretUntisAccesses ? (
+        <>
+          <p>Type: Secret Timetable</p>
+          <p>Untis Username: {untisAccess.secretUntisAccesses.username}</p>
+          <p>Untis Secret: {untisAccess.secretUntisAccesses.secret}</p>
         </>
       ) : (
         'DB SCHEMA ERROR: field type and existing relations do not match'
