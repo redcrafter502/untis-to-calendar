@@ -191,7 +191,7 @@ type UntisAccess = {
 
 export const getEvents = async (untisAccess: UntisAccess) => {
   const untis = getWebUntis(untisAccess)
-  await untis.login().catch((err) => {
+  await untis.login().catch((err: any) => {
     console.error('Login Error (getEvents)', err)
   })
   const { startOfCurrentWeek, endOfNextWeek } = getCurrentAndNextWeekRange()
@@ -232,7 +232,7 @@ export const getEvents = async (untisAccess: UntisAccess) => {
 
     const { startDate, endDate } = await untis.getCurrentSchoolyear()
     const exams = await untis.getExamsForRange(startDate, endDate)
-    examEvents = exams.map((exam) => {
+    examEvents = exams.map((exam: any) => {
       const year = Math.floor(exam.examDate / 10000)
       const month = Math.floor((exam.examDate % 10000) / 100)
       const day = exam.examDate % 100
@@ -297,7 +297,7 @@ export const getEvents = async (untisAccess: UntisAccess) => {
       const correctLesson =
         // @ts-ignore
         homeworkLesson[0].subject ===
-        `${lesson.su[0].longname} (${lesson.su[0].name})`
+        `${lesson.su[0]?.longname} (${lesson.su[0]?.name})`
       // @ts-ignore
       if (lesson.date === iHomework.date && correctLesson) {
         // @ts-ignore
@@ -315,13 +315,13 @@ export const getEvents = async (untisAccess: UntisAccess) => {
     const day = lesson.date % 100
     const [startHour, startMinute] = parseTime(lesson.startTime)
     const [endHour, endMinute] = parseTime(lesson.endTime)
-    const title = lesson.su[0].name || lesson.lstext || 'NO TITLE'
+    const title = lesson.su[0]?.name || lesson.lstext || 'NO TITLE'
     const description =
-      `${lesson.su[0].longname} - ${lesson.kl.map((k) => k.name).join(', ')}` ||
+      `${lesson.su[0]?.longname} - ${lesson.kl.map((k) => k.name).join(', ')}` ||
       `${lesson.lstext} - ${lesson.kl[0].name}` ||
       'NO DESCRIPTION'
     const location =
-      `${lesson.ro[0].longname} (${lesson.ro[0].name})` || 'NO LOCATION'
+      `${lesson.ro[0]?.longname} (${lesson.ro[0]?.name})` || 'NO LOCATION'
     const startUtc = momentTimezone
       .tz(
         [year, month - 1, day, startHour, startMinute],
