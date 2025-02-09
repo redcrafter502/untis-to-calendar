@@ -227,6 +227,7 @@ export const getEvents = async (untisAccess: UntisAccess) => {
     untisAccess.untisAccesses.type === 'password' ||
     untisAccess.untisAccesses.type === 'secret'
   ) {
+    // types from the library don't equal the actual types
     // @ts-ignore
     homework = await untis.getHomeWorksFor(startOfCurrentWeek, endOfNextWeek)
 
