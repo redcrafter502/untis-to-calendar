@@ -20,6 +20,8 @@
     "@hono/node-server": "^1.13.7",
     "@hono/zod-validator": "^0.4.2",
     "@t3-oss/env-core": "^0.11.1",
+    "arktype": "^2.1.17",
+    "axios": "^1.8.4",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.3",
     "dotenv": "^16.4.7",
