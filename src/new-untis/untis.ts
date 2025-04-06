@@ -19,7 +19,7 @@ type GetUntisProps = {
       }
     | {
         type: 'public'
-        classId: string
+        classId?: string
       }
 }
 
@@ -53,6 +53,38 @@ const ClassType = type(
   '[]',
 )
 
+const ShortDataType = type(
+  {
+    id: 'number',
+    name: 'string',
+    longName: 'string',
+    'orgname?': 'string',
+    'ordid?': 'number',
+  },
+  '[]',
+)
+
+const LessonType = type({
+  id: 'number',
+  date: 'number',
+  startTime: 'number',
+  endTime: 'number',
+  kl: ShortDataType,
+  te: ShortDataType,
+  su: ShortDataType,
+  ro: ShortDataType,
+  'lstext?': 'string',
+  'lsnumber?': 'number',
+  'activityType?': '"Unterricht" | string',
+  'code?': '"cancelled" | "irregular"',
+  'info?': 'string',
+  'substText?': 'string',
+  'statflags?': 'string',
+  'sg?': 'string',
+  'bgRemark?': 'string',
+  'bkText?': 'string',
+})
+
 export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
   const identity = 'Awesome'
 
@@ -83,7 +115,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
   async function request<Params>(
     method: string,
     params: Params,
-    validateSession = true,
+    validateSession: boolean,
     session: typeof SessionInformationType.infer,
     url = '/WebUntis/jsonrpc.do',
   ): Promise<Result<unknown, string>> {
@@ -114,6 +146,53 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     if (response.data.result.code)
       return err('Login returned error code: ' + response.data.result.code)
     return ok(response.data.result)
+  }
+
+  async function timetableRequest(
+    id: string | number,
+    type: number,
+    validateSession: boolean,
+    session: typeof SessionInformationType.infer,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<Result<unknown, string>> {
+    const additionalOptions: Record<string, string> = {}
+    if (startDate) {
+      additionalOptions.startDate = convertDateToUntis(startDate, timezone)
+    }
+    if (endDate) {
+      additionalOptions.endDate = convertDateToUntis(endDate, timezone)
+    }
+
+    const lessons = await request(
+      'getTimetable',
+      {
+        options: {
+          id: new Date().getTime(),
+          element: {
+            id,
+            type,
+          },
+          ...additionalOptions,
+          showLsText: true,
+          showStudentgroup: true,
+          showLsNumber: true,
+          showSubstText: true,
+          showInfo: true,
+          showBooking: true,
+          klasseFields: ['id', 'name', 'longname', 'externalkey'],
+          roomFields: ['id', 'name', 'longname', 'externalkey'],
+          subjectFields: ['id', 'name', 'longname', 'externalkey'],
+          teacherFields: ['id', 'name', 'longname', 'externalkey'],
+        },
+      },
+      validateSession,
+      session,
+    )
+
+    console.log('Lessons', lessons)
+
+    return ok()
   }
 
   return {
@@ -200,5 +279,48 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
         return err(validatedClassesData.summary)
       return ok(validatedClassesData)
     },
+    async getTimetableWithHomework(
+      startDate: Date,
+      endDate: Date,
+      classId: number | 'own',
+      session: typeof SessionInformationType.infer,
+      validateSession = true,
+    ): Promise<Result<void, string>> {
+      if (classId === 'own' && auth.type === 'public')
+        return err('Cannot get timetable for "own" class with public auth.')
+
+      await timetableRequest(
+        classId,
+        1,
+        validateSession,
+        session,
+        startDate,
+        endDate,
+      )
+
+      return err('Not implemented')
+    },
   }
+}
+
+function convertDateToUntis(date: Date, timeZone: string): string {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: timeZone,
+    hour12: false,
+  })
+
+  const parts = formatter.formatToParts(date)
+
+  const year = parts.find((part) => part.type === 'year')?.value
+  const month = parts.find((part) => part.type === 'month')?.value
+  const day = parts.find((part) => part.type === 'day')?.value
+
+  if (!year || !month || !day) {
+    throw new Error('Could not format date')
+  }
+
+  return year + month + day
 }
