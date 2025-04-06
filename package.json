@@ -30,6 +30,7 @@
     "ics": "^3.7.2",
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.45",
+    "neverthrow": "^8.2.0",
     "otplib": "^12.0.1",
     "pg": "^8.12.0",
     "webuntis": "^2.2.1",
