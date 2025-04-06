@@ -20,7 +20,7 @@ type GetUntisProps = {
       }
     | {
         type: 'public'
-        classId?: string
+        classId?: number
       }
 }
 
@@ -87,11 +87,36 @@ const LessonType = type({
 })
 
 type Session = {
-  validatedSession: typeof SessionInformationType.infer
+  session: typeof SessionInformationType.infer
   untis: webuntis.Base
 }
 
 export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
+  async function getTimetable(
+    session: Session,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Result<typeof ClassType.infer, string>> {
+    if (auth.type === 'public') {
+      if (!auth.classId) return err('No classId provided for public auth.')
+      const classes = await tryCatch(
+        session.untis.getTimetableForRange(
+          startDate,
+          endDate,
+          auth.classId,
+          webuntis.WebUntisElementType.CLASS,
+        ),
+      )
+      if (classes.isErr()) return err(classes.error.message)
+      const validatedClasses = ClassType(classes)
+      if (validatedClasses instanceof type.errors)
+        return err(validatedClasses.summary)
+
+      return ok(validatedClasses)
+    }
+    return err('Not implemented')
+  }
+
   return {
     async login(): Promise<Result<Session, string>> {
       switch (auth.type) {
@@ -107,7 +132,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           const validatedSession = SessionInformationType(session)
           if (validatedSession instanceof type.errors)
             return err(validatedSession.summary)
-          return ok({ validatedSession, untis })
+          return ok({ session: validatedSession, untis })
         }
         case 'secret': {
           const untis = new webuntis.WebUntisSecretAuth(
@@ -123,7 +148,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           const validatedSession = SessionInformationType(session)
           if (validatedSession instanceof type.errors)
             return err(validatedSession.summary)
-          return ok({ validatedSession, untis })
+          return ok({ session: validatedSession, untis })
         }
         case 'public': {
           const untis = new webuntis.WebUntisAnonymousAuth(school, url)
@@ -132,7 +157,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           const validatedSession = SessionInformationType(session)
           if (validatedSession instanceof type.errors)
             return err(validatedSession.summary)
-          return ok({ validatedSession, untis })
+          return ok({ session: validatedSession, untis })
         }
       }
     },
@@ -162,11 +187,13 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
       startDate: Date,
       endDate: Date,
       classId: number | 'own',
-      session: typeof SessionInformationType.infer,
-      validateSession = true,
+      session: Session,
     ): Promise<Result<void, string>> {
       if (classId === 'own' && auth.type === 'public')
         return err('Cannot get timetable for "own" class with public auth.')
+
+      const timetable = await getTimetable(session, startDate, endDate)
+      console.log(timetable)
 
       return err('Not implemented')
     },
