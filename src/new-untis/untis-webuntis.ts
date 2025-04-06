@@ -66,14 +66,14 @@ const ShortDataType = type(
 )
 
 const LessonType = type({
-  id: 'number',
-  date: 'number',
-  startTime: 'number',
-  endTime: 'number',
-  kl: ShortDataType,
-  te: ShortDataType,
-  su: ShortDataType,
-  ro: ShortDataType,
+  'id?': 'number',
+  'date?': 'number',
+  'startTime?': 'number',
+  'endTime?': 'number',
+  'kl?': ShortDataType,
+  'te?': ShortDataType,
+  'su?': ShortDataType,
+  'ro?': ShortDataType,
   'lstext?': 'string',
   'lsnumber?': 'number',
   'activityType?': '"Unterricht" | string',
@@ -96,7 +96,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     session: Session,
     startDate: Date,
     endDate: Date,
-  ): Promise<Result<typeof ClassType.infer, string>> {
+  ): Promise<Result<typeof LessonType.infer, string>> {
     if (auth.type === 'public') {
       if (!auth.classId) return err('No classId provided for public auth.')
       const classes = await tryCatch(
@@ -108,13 +108,20 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
         ),
       )
       if (classes.isErr()) return err(classes.error.message)
-      const validatedClasses = ClassType(classes)
+      const validatedClasses = LessonType(classes)
       if (validatedClasses instanceof type.errors)
         return err(validatedClasses.summary)
 
       return ok(validatedClasses)
     }
-    return err('Not implemented')
+    const classes = await tryCatch(
+      session.untis.getOwnTimetableForRange(startDate, endDate),
+    )
+    if (classes.isErr()) return err(classes.error.message)
+    const validatedClasses = LessonType(classes.value)
+    if (validatedClasses instanceof type.errors)
+      return err(validatedClasses.summary)
+    return ok(validatedClasses)
   }
 
   return {
@@ -186,12 +193,8 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     async getTimetableWithHomework(
       startDate: Date,
       endDate: Date,
-      classId: number | 'own',
       session: Session,
     ): Promise<Result<void, string>> {
-      if (classId === 'own' && auth.type === 'public')
-        return err('Cannot get timetable for "own" class with public auth.')
-
       const timetable = await getTimetable(session, startDate, endDate)
       console.log(timetable)
 
