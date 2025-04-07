@@ -2,6 +2,7 @@ import webuntis from 'webuntis'
 import { type } from 'arktype'
 import { ok, err, Result } from 'neverthrow'
 import { authenticator as Authenticator } from 'otplib'
+import { tryCatch } from './try-catch'
 
 type GetUntisProps = {
   url: string
@@ -292,16 +293,5 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
       })
       return ok(timetableWithHomework)
     },
-  }
-}
-
-async function tryCatch<T, E = Error>(
-  promise: Promise<T>,
-): Promise<Result<T, E>> {
-  try {
-    const data = await promise
-    return ok(data)
-  } catch (error) {
-    return err(error as E)
   }
 }
