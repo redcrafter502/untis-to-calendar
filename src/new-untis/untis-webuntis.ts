@@ -242,6 +242,9 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     ): Promise<
       Result<
         {
+          date: Result<Date, Error>
+          startTime: Result<Date, Error>
+          endTime: Result<Date, Error>
           lesson: Unarray<typeof LessonType.infer>
           homeworkStart: typeof HomeworkType.infer.homeworks
           homeworkEnd: typeof HomeworkType.infer.homeworks
@@ -297,11 +300,90 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
         }
         return { lesson, homeworkStart: [], homeworkEnd: [] }
       })
-      return ok(timetableWithHomework)
+      const timetableWithTimezones = timetableWithHomework.map((lesson) => {
+        const lessonWithTimezones = {
+          ...lesson,
+          date: convertUntisDateToDate(timezone, lesson.lesson.date),
+          startTime: convertUntisDateToDate(
+            timezone,
+            lesson.lesson.date,
+            lesson.lesson.startTime,
+          ),
+          endTime: convertUntisDateToDate(
+            timezone,
+            lesson.lesson.date,
+            lesson.lesson.endTime,
+          ),
+        }
+        return lessonWithTimezones
+      })
+      return ok(timetableWithTimezones)
     },
   }
 }
 
 function setDateToTimezone(date: Date, timezone: string): Date {
   return new Date(date.toLocaleString('en-US', { timeZone: timezone }))
+}
+
+function convertUntisDateToDate(
+  timezone: string,
+  untisDate: number,
+  untisTime?: number,
+): Result<Date, Error> {
+  const dateString = String(untisDate)
+
+  if (dateString.length !== 8) {
+    console.error('Invalid date format. Date must be in YYYYMMDD format.')
+    return err(
+      new Error('Invalid date format. Date must be in YYYYMMDD format.'),
+    )
+  }
+
+  const year = parseInt(dateString.slice(0, 4))
+  const month = parseInt(dateString.slice(4, 6)) - 1
+  const day = parseInt(dateString.slice(6, 8))
+
+  let hour = 0
+  let minute = 0
+
+  if (untisTime !== undefined) {
+    const timeString = String(untisTime).padStart(4, '0')
+
+    if (timeString.length !== 4) {
+      console.warn('Invalid time format. Time should be in HHMM format.')
+      // Proceed with default 00:00
+    } else {
+      hour = parseInt(timeString.slice(0, 2))
+      minute = parseInt(timeString.slice(2, 4))
+
+      if (isNaN(hour) || isNaN(minute)) {
+        console.error('Invalid time value.')
+        return err(new Error('Invalid time value.'))
+      }
+    }
+  }
+
+  try {
+    // Create a Date object in the specified timezone
+    const dateInTimezone = new Date(year, month, day, hour, minute)
+
+    // Use toLocaleString to ensure the Date object is interpreted in the specified timezone.
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      timeZoneName: 'short',
+    })
+
+    const dateStringInTimezone = formatter.format(dateInTimezone)
+    return ok(new Date(dateStringInTimezone))
+  } catch (error) {
+    console.error('Error converting to timezone:', error)
+    return err(error as Error)
+  }
 }
