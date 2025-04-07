@@ -232,82 +232,44 @@ export const getEvents = async (
 ): Promise<Result<any, string>> => {
   const auth = getAuth(untisAccess)
   if (!auth) return err('Incorrect UntisAccess')
-  const newUntis = getUntis({
+  const untis = getUntis({
     school: untisAccess.untisAccesses.school,
     url: untisAccess.untisAccesses.domain,
     timezone: untisAccess.untisAccesses.timezone,
     auth,
   })
-  const session = await newUntis.login()
+  const session = await untis.login()
   if (session.isErr()) return err(session.error)
-  const untis = getWebUntis(untisAccess)
-  await untis.login().catch((err: any) => {
-    console.error('Login Error (getEvents)', err)
-  })
   const { startOfCurrentWeek, endOfNextWeek } = getCurrentAndNextWeekRange()
 
-  let examEvents: {
-    start: number[]
-    startInputType: string
-    startOutputType: string
-    end: number[]
-    endInputType: string
-    endOutputType: string
-    title: string
-    description: string
-    location: string
-    status: string
-    busyStatus: string
-    transp: string
-    calName: any
-  }[] = []
+  let examEvents: Result<any, string>[] = []
   if (
     untisAccess.untisAccesses.type === 'password' ||
     untisAccess.untisAccesses.type === 'secret'
   ) {
-    const { startDate, endDate } = await untis.getCurrentSchoolyear()
-    const exams = await untis.getExamsForRange(startDate, endDate)
-    examEvents = exams.map((exam: any) => {
-      const year = Math.floor(exam.examDate / 10000)
-      const month = Math.floor((exam.examDate % 10000) / 100)
-      const day = exam.examDate % 100
-      const [startHour, startMinute] = parseTime(exam.startTime)
-      const [endHour, endMinute] = parseTime(exam.endTime)
-      const startUtc = momentTimezone
-        .tz(
-          [year, month - 1, day, startHour, startMinute],
-          untisAccess.untisAccesses.timezone,
-        )
-        .utc()
-      const endUtc = momentTimezone
-        .tz(
-          [year, month - 1, day, endHour, endMinute],
-          untisAccess.untisAccesses.timezone,
-        )
-        .utc()
-      const title = `${exam.name} (${exam.examType})` || 'NO TITLE'
+    const exams = await untis.getExamsForCurrentSchoolyear(session.value)
+    if (exams.isErr()) return err(exams.error)
+    examEvents = exams.value.map((exam): Result<any, string> => {
+      if (exam.startTime.isErr()) return err(exam.startTime.error.message)
+      const year = exam.startTime.value.getUTCFullYear()
+      const month = exam.startTime.value.getUTCMonth()
+      const day = exam.startTime.value.getUTCDate()
+      const startHour = exam.startTime.value.getUTCHours()
+      const startMinute = exam.startTime.value.getUTCMinutes()
+      if (exam.endTime.isErr()) return err(exam.endTime.error.message)
+      const endHour = exam.endTime.value.getUTCHours()
+      const endMinute = exam.endTime.value.getUTCMinutes()
+      const title = `${exam.exam.name} (${exam.exam.examType})` || 'NO TITLE'
       const description =
-        `${exam.name} (${exam.subject} - ${exam.studentClass.join(' ')} - ${exam.teachers.join(' ')}) ${exam.text}` ||
+        `${exam.exam.name} (${exam.exam.subject} - ${exam.exam.studentClass.join(' ')} - ${exam.exam.teachers.join(' ')}) ${exam.exam.text}` ||
         'NO DESCRIPTION'
-      const location = exam.rooms.join(' ') || 'NO LOCATION'
+      const location = exam.exam.rooms.join(' ') || 'NO LOCATION'
 
-      return {
-        start: [
-          startUtc.year(),
-          startUtc.month() + 1,
-          startUtc.date(),
-          startUtc.hour(),
-          startUtc.minute(),
-        ],
+      return ok({
+        start: [year, month + 1, day, startHour, startMinute],
         startInputType: 'utc',
         startOutputType: 'utc',
-        end: [
-          endUtc.year(),
-          endUtc.month() + 1,
-          endUtc.date(),
-          endUtc.hour(),
-          endUtc.minute(),
-        ],
+        end: [year, month + 1, day, endHour, endMinute],
         endInputType: 'utc',
         endOutputType: 'utc',
         title,
@@ -317,15 +279,16 @@ export const getEvents = async (
         busyStatus: 'BUSY',
         transp: 'OPAQUE',
         calName: untisAccess.untisAccesses.name,
-      }
+      })
     })
   }
 
-  const timetable = await newUntis.getTimetableWithHomework(
+  const timetable = await untis.getTimetableWithHomework(
     startOfCurrentWeek,
     endOfNextWeek,
     session.value,
   )
+  await untis.logout(session.value)
   if (timetable.isErr()) return err(timetable.error)
 
   const events = timetable.value.map((lesson): Result<any, string> => {
@@ -375,10 +338,8 @@ export const getEvents = async (
       calName: untisAccess.untisAccesses.name,
     })
   })
-  await untis.logout()
-  await newUntis.logout(session.value)
   return ok([
     ...events.filter((event) => event.isOk()).map((event) => event.value),
-    ...examEvents,
+    ...examEvents.filter((event) => event.isOk()).map((event) => event.value),
   ])
 }

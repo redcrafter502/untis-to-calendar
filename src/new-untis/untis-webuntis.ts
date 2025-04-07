@@ -128,6 +128,32 @@ const HomeworkType = type({
   ),
 })
 
+const ExamType = type({
+  id: 'number',
+  examType: 'string',
+  name: 'string',
+  studentClass: 'string[]',
+  assignedStudents: type(
+    {
+      klasse: { id: 'number', name: 'string' },
+      displayName: 'string',
+      id: 'number',
+    },
+    '[]',
+  ),
+  examDate: 'number',
+  startTime: 'number',
+  endTime: 'number',
+  subject: 'string',
+  teachers: 'string[]',
+  'location?': 'string',
+  rooms: 'string[]',
+  text: 'string',
+  'grade?': 'string',
+})
+
+const ExamsType = type(ExamType, '[]')
+
 type Session = {
   session: typeof SessionInformationType.infer
   untis: webuntis.Base
@@ -368,6 +394,54 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
         return lessonWithTimezones
       })
       return ok(timetableWithTimezones)
+    },
+    async getExamsForCurrentSchoolyear(session: Session): Promise<
+      Result<
+        {
+          startTime: Result<Date, Error>
+          endTime: Result<Date, Error>
+          exam: typeof ExamType.infer
+        }[],
+        string
+      >
+    > {
+      if (auth.type === 'public')
+        return err('Getting Exams is not supported with public auth.')
+      const schoolyearData = await tryCatch(
+        session.untis.getCurrentSchoolyear(),
+      )
+
+      if (schoolyearData.isErr()) return err(schoolyearData.error.message)
+      const validatedSchoolyearData = SchoolYearType(schoolyearData.value)
+      if (validatedSchoolyearData instanceof type.errors)
+        return err(validatedSchoolyearData.summary)
+
+      const exams = await tryCatch(
+        session.untis.getExamsForRange(
+          validatedSchoolyearData.startDate,
+          validatedSchoolyearData.endDate,
+        ),
+      )
+      if (exams.isErr()) return err(exams.error.message)
+      const validatedExams = ExamsType(exams.value)
+      if (validatedExams instanceof type.errors)
+        return err(validatedExams.summary)
+
+      return ok(
+        validatedExams.map((exam) => ({
+          exam,
+          startTime: convertUntisDateToDate(
+            timezone,
+            exam.examDate,
+            exam.startTime,
+          ),
+          endTime: convertUntisDateToDate(
+            timezone,
+            exam.examDate,
+            exam.endTime,
+          ),
+        })),
+      )
     },
   }
 }
