@@ -58,38 +58,82 @@ const ShortDataType = type(
   {
     id: 'number',
     name: 'string',
-    longName: 'string',
-    'orgname?': 'string',
+    'longname?': 'string',
+    'orgname?': 'string', // Replacement if original is not available
     'ordid?': 'number',
   },
   '[]',
 )
 
-const LessonType = type({
-  'id?': 'number',
-  'date?': 'number',
-  'startTime?': 'number',
-  'endTime?': 'number',
-  'kl?': ShortDataType,
-  'te?': ShortDataType,
-  'su?': ShortDataType,
-  'ro?': ShortDataType,
-  'lstext?': 'string',
-  'lsnumber?': 'number',
-  'activityType?': '"Unterricht" | string',
-  'code?': '"cancelled" | "irregular"',
-  'info?': 'string',
-  'substText?': 'string',
-  'statflags?': 'string',
-  'sg?': 'string',
-  'bgRemark?': 'string',
-  'bkText?': 'string',
+const LessonType = type(
+  {
+    id: 'number',
+    date: 'number',
+    startTime: 'number',
+    endTime: 'number',
+    'kl?': ShortDataType,
+    'te?': ShortDataType,
+    'su?': ShortDataType,
+    'ro?': ShortDataType,
+    'lstext?': 'string',
+    'lsnumber?': 'number',
+    'activityType?': '"Unterricht" | string',
+    'code?': '"cancelled" | "irregular"',
+    'info?': 'string',
+    'substText?': 'string',
+    'statflags?': 'string',
+    'sg?': 'string',
+    'bgRemark?': 'string',
+    'bkText?': 'string',
+  },
+  '[]',
+)
+
+const HomeworkType = type({
+  records: type(
+    {
+      homeworkId: 'number',
+      teacherId: 'number',
+      elementIds: 'number[]',
+    },
+    '[]',
+  ),
+  homeworks: type(
+    {
+      id: 'number',
+      lessonId: 'number',
+      date: 'number',
+      dueDate: 'number',
+      text: 'string',
+      remark: 'string',
+      completed: 'boolean',
+      attachments: 'unknown[]',
+    },
+    '[]',
+  ),
+  teachers: type(
+    {
+      id: 'number',
+      name: 'string',
+    },
+    '[]',
+  ),
+  lessons: type(
+    {
+      id: 'number',
+      subject: 'string',
+      lessonType: '"Unterricht" | string',
+    },
+    '[]',
+  ),
 })
 
 type Session = {
   session: typeof SessionInformationType.infer
   untis: webuntis.Base
 }
+
+type Unarray<T> = T extends (infer U)[] ? U : T
 
 export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
   async function getTimetable(
@@ -194,35 +238,61 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
       startDate: Date,
       endDate: Date,
       session: Session,
-    ): Promise<Result<void, string>> {
+    ): Promise<
+      Result<
+        {
+          lesson: Unarray<typeof LessonType.infer>
+          homeworkStart: typeof HomeworkType.infer.homeworks
+          homeworkEnd: typeof HomeworkType.infer.homeworks
+        }[],
+        string
+      >
+    > {
       const timetable = await getTimetable(session, startDate, endDate)
-      console.log(timetable)
+      if (timetable.isErr()) return err(timetable.error)
+      const homework = await tryCatch(
+        session.untis.getHomeWorksFor(startDate, endDate),
+      )
+      if (homework.isErr()) return err(homework.error.message)
+      const validatedHomework = HomeworkType(homework.value)
+      if (validatedHomework instanceof type.errors)
+        return err(validatedHomework.summary)
 
-      return err('Not implemented')
+      const homeworkWithLesson = validatedHomework.homeworks.map(
+        (homework) => ({
+          homework,
+          lesson: validatedHomework.lessons.find(
+            (lesson) => lesson.id === homework.lessonId,
+          ),
+        }),
+      )
+
+      const timetableWithHomework = timetable.value.map((lesson) => {
+        const homeworkForLesson = homeworkWithLesson.filter(
+          (homework) =>
+            homework.lesson?.subject ===
+              (lesson?.su !== undefined
+                ? `${lesson.su[0]?.longname} (${lesson.su[0]?.name})`
+                : false) &&
+            (homework.homework.date === lesson.date ||
+              homework.homework.dueDate === lesson.date),
+        )
+        if (homeworkForLesson.length > 0) {
+          return {
+            lesson,
+            homeworkStart: homeworkForLesson
+              .map((homework) => homework.homework)
+              .filter((homework) => homework.date === lesson.date),
+            homeworkEnd: homeworkForLesson
+              .map((homework) => homework.homework)
+              .filter((homework) => homework.dueDate === lesson.date),
+          }
+        }
+        return { lesson, homeworkStart: [], homeworkEnd: [] }
+      })
+      return ok(timetableWithHomework)
     },
   }
-}
-
-function convertDateToUntis(date: Date, timeZone: string): string {
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: timeZone,
-    hour12: false,
-  })
-
-  const parts = formatter.formatToParts(date)
-
-  const year = parts.find((part) => part.type === 'year')?.value
-  const month = parts.find((part) => part.type === 'month')?.value
-  const day = parts.find((part) => part.type === 'day')?.value
-
-  if (!year || !month || !day) {
-    throw new Error('Could not format date')
-  }
-
-  return year + month + day
 }
 
 async function tryCatch<T, E = Error>(
