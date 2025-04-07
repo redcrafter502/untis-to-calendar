@@ -16,6 +16,7 @@ import { eq, and } from 'drizzle-orm'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { env } from '@/env'
+import { getUntis } from '@/new-untis/untis-webuntis'
 
 const app = new Hono()
 
@@ -123,21 +124,22 @@ app.post(
 
     let classes = null
     if (body.type === 'public') {
-      try {
-        const untis = getWebUntis({
-          untisAccesses: {
-            school: body.school,
-            domain: body.domain,
-            type: 'public',
-          },
-        })
-        await untis.login()
-        const schoolYear = await untis.getCurrentSchoolyear()
-        classes = await untis.getClasses(true, schoolYear.id)
-        await untis.logout()
-      } catch {
-        return c.redirect('/panel')
-      }
+      const untis = getUntis({
+        school: body.school,
+        url: body.domain,
+        timezone,
+        auth: {
+          type: 'public',
+        },
+      })
+      const session = await untis.login()
+      if (session.isErr()) return c.redirect('/panel')
+      const classesData = await untis.getClassesForCurrentSchoolYear(
+        session.value,
+      )
+      await untis.logout(session.value)
+      if (classesData.isErr()) return c.redirect('/panel')
+      classes = classesData.value
     }
 
     return c.html(
