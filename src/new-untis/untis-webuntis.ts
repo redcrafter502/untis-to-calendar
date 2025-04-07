@@ -500,7 +500,6 @@ function convertUntisDateToDate(
     const dateStringInTimezone = formatter.format(dateInTimezone)
     return ok(new Date(dateStringInTimezone))
   } catch (error) {
-    console.error('Error converting to timezone:', error)
     return err(error as Error)
   }
 }

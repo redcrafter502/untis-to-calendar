@@ -3,7 +3,6 @@ import { AUTH_COOKIE_NAME, isLoggedIn } from '@/services/auth'
 import { getCookie } from 'hono/cookie'
 import Layout from '@/layout'
 import Input from '@/components/input'
-import { getWebUntis } from '@/services/untis'
 import { randomUUID } from 'node:crypto'
 import { db } from '@/db'
 import {
