@@ -197,7 +197,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           ),
         )
         if (dayTimetable.isOk()) {
-          const validatedDayTimetable = LessonType(dayTimetable)
+          const validatedDayTimetable = LessonType(dayTimetable.value)
           if (!(validatedDayTimetable instanceof type.errors))
             returnTimetable.push(validatedDayTimetable)
         }
@@ -224,7 +224,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
         session.untis.getOwnTimetableForRange(date, date),
       )
       if (dayTimetable.isOk()) {
-        const validatedDayTimetable = LessonType(dayTimetable)
+        const validatedDayTimetable = LessonType(dayTimetable.value)
         if (!(validatedDayTimetable instanceof type.errors))
           returnTimetable.push(validatedDayTimetable)
       }
@@ -260,7 +260,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           )
           const session = await tryCatch(untis.login())
           if (session.isErr()) return err(session.error.message)
-          const validatedSession = SessionInformationType(session)
+          const validatedSession = SessionInformationType(session.value)
           if (validatedSession instanceof type.errors)
             return err(validatedSession.summary)
           return ok({ session: validatedSession, untis })
@@ -276,7 +276,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           )
           const session = await tryCatch(untis.login())
           if (session.isErr()) return err(session.error.message)
-          const validatedSession = SessionInformationType(session)
+          const validatedSession = SessionInformationType(session.value)
           if (validatedSession instanceof type.errors)
             return err(validatedSession.summary)
           return ok({ session: validatedSession, untis })
@@ -285,7 +285,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           const untis = new webuntis.WebUntisAnonymousAuth(school, url)
           const session = await tryCatch(untis.login())
           if (session.isErr()) return err(session.error.message)
-          const validatedSession = SessionInformationType(session)
+          const validatedSession = SessionInformationType(session.value)
           if (validatedSession instanceof type.errors)
             return err(validatedSession.summary)
           return ok({ session: validatedSession, untis })
@@ -300,16 +300,19 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     async getClassesForCurrentSchoolYear(
       session: Session,
     ): Promise<Result<typeof ClassType.infer, string>> {
-      const schoolyearData = await session.untis.getCurrentSchoolyear()
-      const validatedSchoolyearData = SchoolYearType(schoolyearData)
+      const schoolyearData = await tryCatch(
+        session.untis.getCurrentSchoolyear(),
+      )
+      if (schoolyearData.isErr()) return err(schoolyearData.error.message)
+      const validatedSchoolyearData = SchoolYearType(schoolyearData.value)
       if (validatedSchoolyearData instanceof type.errors)
         return err(validatedSchoolyearData.summary)
 
-      const classesData = await session.untis.getClasses(
-        true,
-        validatedSchoolyearData.id,
+      const classesData = await tryCatch(
+        session.untis.getClasses(true, validatedSchoolyearData.id),
       )
-      const validatedClassesData = ClassType(classesData)
+      if (classesData.isErr()) return err(classesData.error.message)
+      const validatedClassesData = ClassType(classesData.value)
       if (validatedClassesData instanceof type.errors)
         return err(validatedClassesData.summary)
       return ok(validatedClassesData)
