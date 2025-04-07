@@ -208,6 +208,22 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     return ok(returnTimetable)
   }
 
+  async function getHomework(
+    session: Session,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Result<typeof HomeworkType.infer, string>> {
+    const homework = await tryCatch(
+      session.untis.getHomeWorksFor(startDate, endDate),
+    )
+    if (homework.isErr())
+      return ok({ records: [], homeworks: [], teachers: [], lessons: [] })
+    const validatedHomework = HomeworkType(homework.value)
+    if (validatedHomework instanceof type.errors)
+      return err(validatedHomework.summary)
+    return ok(validatedHomework)
+  }
+
   return {
     async login(): Promise<Result<Session, string>> {
       switch (auth.type) {
@@ -299,18 +315,17 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
         endDateInTimezone,
       )
       if (timetable.isErr()) return err(timetable.error)
-      const homework = await tryCatch(
-        session.untis.getHomeWorksFor(startDateInTimezone, endDateInTimezone),
+      const homeworkData = await getHomework(
+        session,
+        startDateInTimezone,
+        endDateInTimezone,
       )
-      if (homework.isErr()) return err(homework.error.message)
-      const validatedHomework = HomeworkType(homework.value)
-      if (validatedHomework instanceof type.errors)
-        return err(validatedHomework.summary)
+      if (homeworkData.isErr()) return err(homeworkData.error)
 
-      const homeworkWithLesson = validatedHomework.homeworks.map(
+      const homeworkWithLesson = homeworkData.value.homeworks.map(
         (homework) => ({
           homework,
-          lesson: validatedHomework.lessons.find(
+          lesson: homeworkData.value.lessons.find(
             (lesson) => lesson.id === homework.lessonId,
           ),
         }),
