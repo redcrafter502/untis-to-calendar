@@ -249,10 +249,16 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
         string
       >
     > {
-      const timetable = await getTimetable(session, startDate, endDate)
+      const startDateInTimezone = setDateToTimezone(startDate, timezone)
+      const endDateInTimezone = setDateToTimezone(endDate, timezone)
+      const timetable = await getTimetable(
+        session,
+        startDateInTimezone,
+        endDateInTimezone,
+      )
       if (timetable.isErr()) return err(timetable.error)
       const homework = await tryCatch(
-        session.untis.getHomeWorksFor(startDate, endDate),
+        session.untis.getHomeWorksFor(startDateInTimezone, endDateInTimezone),
       )
       if (homework.isErr()) return err(homework.error.message)
       const validatedHomework = HomeworkType(homework.value)
@@ -294,4 +300,8 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
       return ok(timetableWithHomework)
     },
   }
+}
+
+function setDateToTimezone(date: Date, timezone: string): Date {
+  return new Date(date.toLocaleString('en-US', { timeZone: timezone }))
 }
