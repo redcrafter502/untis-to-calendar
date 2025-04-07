@@ -6,8 +6,7 @@ const getCurrentAndNextWeekRange = () => {
 
   // Calculate the start of the current week (Monday)
   const startOfCurrentWeek = new Date(now)
-  // TODO: change back to +1
-  startOfCurrentWeek.setDate(now.getDate() - now.getDay() - 6) // Monday
+  startOfCurrentWeek.setDate(now.getDate() - now.getDay() + 1) // Monday
 
   // Calculate the end of the next week (Sunday)
   const endOfNextWeek = new Date(startOfCurrentWeek)
