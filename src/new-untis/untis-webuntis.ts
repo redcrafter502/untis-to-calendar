@@ -334,7 +334,6 @@ function convertUntisDateToDate(
   const dateString = String(untisDate)
 
   if (dateString.length !== 8) {
-    console.error('Invalid date format. Date must be in YYYYMMDD format.')
     return err(
       new Error('Invalid date format. Date must be in YYYYMMDD format.'),
     )
@@ -350,15 +349,11 @@ function convertUntisDateToDate(
   if (untisTime !== undefined) {
     const timeString = String(untisTime).padStart(4, '0')
 
-    if (timeString.length !== 4) {
-      console.warn('Invalid time format. Time should be in HHMM format.')
-      // Proceed with default 00:00
-    } else {
+    if (timeString.length === 4) {
       hour = parseInt(timeString.slice(0, 2))
       minute = parseInt(timeString.slice(2, 4))
 
       if (isNaN(hour) || isNaN(minute)) {
-        console.error('Invalid time value.')
         return err(new Error('Invalid time value.'))
       }
     }
