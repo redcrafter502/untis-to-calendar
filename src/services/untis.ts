@@ -1,6 +1,8 @@
 import webuntis from 'webuntis'
 import momentTimezone from 'moment-timezone'
 import { authenticator as Authenticator } from 'otplib'
+import { getUntis } from '@/new-untis/untis-webuntis'
+import { Result, ok, err } from 'neverthrow'
 
 const parseTime = (time: number) => {
   const hour = Math.floor(time / 100)
@@ -13,7 +15,8 @@ const getCurrentAndNextWeekRange = () => {
 
   // Calculate the start of the current week (Monday)
   const startOfCurrentWeek = new Date(now)
-  startOfCurrentWeek.setDate(now.getDate() - now.getDay() + 1) // Monday
+  // TODO: change back to +1
+  startOfCurrentWeek.setDate(now.getDate() - now.getDay() - 6) // Monday
 
   // Calculate the end of the next week (Sunday)
   const endOfNextWeek = new Date(startOfCurrentWeek)
@@ -189,25 +192,60 @@ type UntisAccess = {
   } | null
 }
 
-export const getEvents = async (untisAccess: UntisAccess) => {
+function getAuth(
+  untisAccess: UntisAccess,
+):
+  | { type: 'password'; username: string; password: string }
+  | { type: 'secret'; username: string; secret: string }
+  | { type: 'public'; classId: number }
+  | undefined {
+  if (
+    untisAccess.untisAccesses.type === 'password' &&
+    untisAccess.passwordUntisAccesses
+  )
+    return {
+      type: 'password',
+      username: untisAccess.passwordUntisAccesses.username,
+      password: untisAccess.passwordUntisAccesses.password,
+    }
+  if (
+    untisAccess.untisAccesses.type === 'secret' &&
+    untisAccess.secretUntisAccesses
+  )
+    return {
+      type: 'secret',
+      username: untisAccess.secretUntisAccesses.username,
+      secret: untisAccess.secretUntisAccesses.secret,
+    }
+  if (
+    untisAccess.untisAccesses.type === 'public' &&
+    untisAccess.publicUntisAccesses
+  )
+    return {
+      type: 'public',
+      classId: Number(untisAccess.publicUntisAccesses.classId),
+    }
+}
+
+export const getEvents = async (
+  untisAccess: UntisAccess,
+): Promise<Result<any, string>> => {
+  const auth = getAuth(untisAccess)
+  if (!auth) return err('Incorrect UntisAccess')
+  const newUntis = getUntis({
+    school: untisAccess.untisAccesses.school,
+    url: untisAccess.untisAccesses.domain,
+    timezone: untisAccess.untisAccesses.timezone,
+    auth,
+  })
+  const session = await newUntis.login()
+  if (session.isErr()) return err(session.error)
   const untis = getWebUntis(untisAccess)
   await untis.login().catch((err: any) => {
     console.error('Login Error (getEvents)', err)
   })
   const { startOfCurrentWeek, endOfNextWeek } = getCurrentAndNextWeekRange()
-  const timetable = await getTimetable(
-    startOfCurrentWeek,
-    endOfNextWeek,
-    untisAccess,
-    untis,
-  )
 
-  let homework = {
-    records: [],
-    homeworks: [],
-    teachers: [],
-    lessons: [],
-  }
   let examEvents: {
     start: number[]
     startInputType: string
@@ -227,10 +265,6 @@ export const getEvents = async (untisAccess: UntisAccess) => {
     untisAccess.untisAccesses.type === 'password' ||
     untisAccess.untisAccesses.type === 'secret'
   ) {
-    // types from the library don't equal the actual types
-    // @ts-ignore
-    homework = await untis.getHomeWorksFor(startOfCurrentWeek, endOfNextWeek)
-
     const { startDate, endDate } = await untis.getCurrentSchoolyear()
     const exams = await untis.getExamsForRange(startDate, endDate)
     examEvents = exams.map((exam: any) => {
@@ -287,85 +321,64 @@ export const getEvents = async (untisAccess: UntisAccess) => {
     })
   }
 
-  const events = timetable.map((lesson) => {
-    const homeworks: string[] = []
-    homework.homeworks.forEach((iHomework) => {
-      const homeworkLesson = homework.lessons.filter(
-        // @ts-ignore
-        (l) => l.id === iHomework.lessonId,
-      )
-      // @ts-ignore
-      const correctLesson =
-        // @ts-ignore
-        homeworkLesson[0].subject ===
-        `${lesson.su[0]?.longname} (${lesson.su[0]?.name})`
-      // @ts-ignore
-      if (lesson.date === iHomework.date && correctLesson) {
-        // @ts-ignore
-        homeworks.push(`${iHomework.text} (Start)`)
-      }
-      // @ts-ignore
-      if (lesson.date === iHomework.dueDate && correctLesson) {
-        // @ts-ignore
-        homeworks.push(`${iHomework.text} (End)`)
-      }
-    })
+  const timetable = await newUntis.getTimetableWithHomework(
+    startOfCurrentWeek,
+    endOfNextWeek,
+    session.value,
+  )
+  if (timetable.isErr()) return err(timetable.error)
 
-    const year = Math.floor(lesson.date / 10000)
-    const month = Math.floor((lesson.date % 10000) / 100)
-    const day = lesson.date % 100
-    const [startHour, startMinute] = parseTime(lesson.startTime)
-    const [endHour, endMinute] = parseTime(lesson.endTime)
-    const title = lesson.su[0]?.name || lesson.lstext || 'NO TITLE'
+  const events = timetable.value.map((lesson): Result<any, string> => {
+    if (lesson.startTime.isErr()) return err(lesson.startTime.error.message)
+    const year = lesson.startTime.value.getUTCFullYear()
+    const month = lesson.startTime.value.getUTCMonth()
+    const day = lesson.startTime.value.getUTCDate()
+    const startHour = lesson.startTime.value.getUTCHours()
+    const startMinute = lesson.startTime.value.getUTCMinutes()
+    if (lesson.endTime.isErr()) return err(lesson.endTime.error.message)
+    const endHour = lesson.endTime.value.getUTCHours()
+    const endMinute = lesson.endTime.value.getUTCMinutes()
+    const lessonSu = lesson.lesson.su || []
+    const title = lessonSu[0]?.name || lesson.lesson.lstext || 'NO TITLE'
+    const lessonKl = lesson.lesson.kl || []
     const description =
-      `${lesson.su[0]?.longname} - ${lesson.kl.map((k) => k.name).join(', ')}` ||
-      `${lesson.lstext} - ${lesson.kl[0].name}` ||
+      `${lessonSu[0]?.longname} - ${lesson.lesson.kl?.map((k) => k.name).join(', ')}` ||
+      `${lesson.lesson.lstext} - ${lessonKl[0].name}` ||
       'NO DESCRIPTION'
+    const lessonRo = lesson.lesson.ro || []
     const location =
-      `${lesson.ro[0]?.longname} (${lesson.ro[0]?.name})` || 'NO LOCATION'
-    const startUtc = momentTimezone
-      .tz(
-        [year, month - 1, day, startHour, startMinute],
-        untisAccess.untisAccesses.timezone,
-      )
-      .utc()
-    const endUtc = momentTimezone
-      .tz(
-        [year, month - 1, day, endHour, endMinute],
-        untisAccess.untisAccesses.timezone,
-      )
-      .utc()
-    const descriptionWithHomework = [description, ...homeworks].join(`\n`)
-    const titleWithInfoMark = title + (homeworks.length > 0 ? ' ℹ️' : '')
+      `${lessonRo[0]?.longname} (${lessonRo[0]?.name})` || 'NO LOCATION'
+    const homeworkStart = lesson.homeworkStart.map((homework) => homework.text)
+    const homeworkEnd = lesson.homeworkEnd.map((homework) => homework.text)
+    const descriptionWithHomework = [
+      description,
+      'Homework to today:',
+      ...homeworkEnd,
+      'Homework from today:',
+      ...homeworkStart,
+    ].join(`\n`)
+    const titleWithInfoMark = title + (homeworkEnd.length > 0 ? ' ℹ️' : '')
 
-    return {
-      start: [
-        startUtc.year(),
-        startUtc.month() + 1,
-        startUtc.date(),
-        startUtc.hour(),
-        startUtc.minute(),
-      ],
+    return ok({
+      start: [year, month + 1, day, startHour, startMinute],
       startInputType: 'utc',
       startOutputType: 'utc',
-      end: [
-        endUtc.year(),
-        endUtc.month() + 1,
-        endUtc.date(),
-        endUtc.hour(),
-        endUtc.minute(),
-      ],
+      end: [year, month + 1, day, endHour, endMinute],
       endInputType: 'utc',
       endOutputType: 'utc',
       title: titleWithInfoMark,
       description: descriptionWithHomework,
       location,
-      status: lesson.code === 'cancelled' ? 'CANCELLED' : 'CONFIRMED',
-      busyStatus: lesson.code === 'cancelled' ? 'FREE' : 'BUSY',
-      transp: lesson.code === 'cancelled' ? 'TRANSPARENT' : 'OPAQUE',
+      status: lesson.lesson.code === 'cancelled' ? 'CANCELLED' : 'CONFIRMED',
+      busyStatus: lesson.lesson.code === 'cancelled' ? 'FREE' : 'BUSY',
+      transp: lesson.lesson.code === 'cancelled' ? 'TRANSPARENT' : 'OPAQUE',
       calName: untisAccess.untisAccesses.name,
-    }
+    })
   })
   await untis.logout()
-  return [...events, ...examEvents]
+  await newUntis.logout(session.value)
+  return ok([
+    ...events.filter((event) => event.isOk()).map((event) => event.value),
+    ...examEvents,
+  ])
 }

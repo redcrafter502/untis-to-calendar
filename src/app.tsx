@@ -45,8 +45,9 @@ app.get('/ics/:id', async (c) => {
   if (!untisAccess)
     return c.text(`Did not found UntisAccess for UrlID: ${id}`, 404)
   const events = await getEvents(untisAccess)
+  if (events.isErr()) return c.text(events.error, 500)
   // @ts-ignore
-  const { err, value } = ics.createEvents(events)
+  const { err, value } = ics.createEvents(events.value)
   if (err) {
     console.error('ICS Error', err)
     return

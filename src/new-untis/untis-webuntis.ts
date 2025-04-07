@@ -133,8 +133,6 @@ type Session = {
   untis: webuntis.Base
 }
 
-type Unarray<T> = T extends (infer U)[] ? U : T
-
 export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
   async function getTimetable(
     session: Session,
@@ -297,7 +295,6 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     ): Promise<
       Result<
         {
-          date: Result<Date, Error>
           startTime: Result<Date, Error>
           endTime: Result<Date, Error>
           lesson: typeof LessonType.infer
@@ -357,7 +354,6 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
       const timetableWithTimezones = timetableWithHomework.map((lesson) => {
         const lessonWithTimezones = {
           ...lesson,
-          date: convertUntisDateToDate(timezone, lesson.lesson.date),
           startTime: convertUntisDateToDate(
             timezone,
             lesson.lesson.date,
@@ -383,7 +379,7 @@ function setDateToTimezone(date: Date, timezone: string): Date {
 function convertUntisDateToDate(
   timezone: string,
   untisDate: number,
-  untisTime?: number,
+  untisTime: number,
 ): Result<Date, Error> {
   const dateString = String(untisDate)
 
@@ -400,16 +396,14 @@ function convertUntisDateToDate(
   let hour = 0
   let minute = 0
 
-  if (untisTime !== undefined) {
-    const timeString = String(untisTime).padStart(4, '0')
+  const timeString = String(untisTime).padStart(4, '0')
 
-    if (timeString.length === 4) {
-      hour = parseInt(timeString.slice(0, 2))
-      minute = parseInt(timeString.slice(2, 4))
+  if (timeString.length === 4) {
+    hour = parseInt(timeString.slice(0, 2))
+    minute = parseInt(timeString.slice(2, 4))
 
-      if (isNaN(hour) || isNaN(minute)) {
-        return err(new Error('Invalid time value.'))
-      }
+    if (isNaN(hour) || isNaN(minute)) {
+      return err(new Error('Invalid time value.'))
     }
   }
 
