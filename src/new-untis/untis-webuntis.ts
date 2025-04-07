@@ -66,29 +66,28 @@ const ShortDataType = type(
   '[]',
 )
 
-const LessonType = type(
-  {
-    id: 'number',
-    date: 'number',
-    startTime: 'number',
-    endTime: 'number',
-    'kl?': ShortDataType,
-    'te?': ShortDataType,
-    'su?': ShortDataType,
-    'ro?': ShortDataType,
-    'lstext?': 'string',
-    'lsnumber?': 'number',
-    'activityType?': '"Unterricht" | string',
-    'code?': '"cancelled" | "irregular"',
-    'info?': 'string',
-    'substText?': 'string',
-    'statflags?': 'string',
-    'sg?': 'string',
-    'bgRemark?': 'string',
-    'bkText?': 'string',
-  },
-  '[]',
-)
+const LessonType = type({
+  id: 'number',
+  date: 'number',
+  startTime: 'number',
+  endTime: 'number',
+  'kl?': ShortDataType,
+  'te?': ShortDataType,
+  'su?': ShortDataType,
+  'ro?': ShortDataType,
+  'lstext?': 'string',
+  'lsnumber?': 'number',
+  'activityType?': '"Unterricht" | string',
+  'code?': '"cancelled" | "irregular"',
+  'info?': 'string',
+  'substText?': 'string',
+  'statflags?': 'string',
+  'sg?': 'string',
+  'bgRemark?': 'string',
+  'bkText?': 'string',
+})
+
+const LessonsType = type(LessonType, '[]')
 
 const HomeworkType = type({
   records: type(
@@ -141,7 +140,8 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     session: Session,
     startDate: Date,
     endDate: Date,
-  ): Promise<Result<typeof LessonType.infer, string>> {
+  ): Promise<Result<typeof LessonsType.infer, string>> {
+    // Public timetables
     if (auth.type === 'public') {
       if (!auth.classId) return err('No classId provided for public auth.')
       const classes = await tryCatch(
@@ -152,21 +152,60 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           webuntis.WebUntisElementType.CLASS,
         ),
       )
-      if (classes.isErr()) return err(classes.error.message)
-      const validatedClasses = LessonType(classes)
-      if (validatedClasses instanceof type.errors)
-        return err(validatedClasses.summary)
-
-      return ok(validatedClasses)
+      if (classes.isOk()) {
+        const validatedClasses = LessonsType(classes.value)
+        if (!(validatedClasses instanceof type.errors))
+          return ok(validatedClasses)
+      }
+      // if range failed get each day individually
+      let returnTimetable: typeof LessonsType.infer = []
+      for (
+        let date = new Date(startDate);
+        date <= endDate;
+        date.setDate(date.getDate() + 1)
+      ) {
+        const dayTimetable = await tryCatch(
+          session.untis.getTimetableForRange(
+            date,
+            date,
+            auth.classId,
+            webuntis.WebUntisElementType.CLASS,
+          ),
+        )
+        if (dayTimetable.isOk()) {
+          const validatedDayTimetable = LessonType(dayTimetable)
+          if (!(validatedDayTimetable instanceof type.errors))
+            returnTimetable.push(validatedDayTimetable)
+        }
+      }
+      return ok(returnTimetable)
     }
+    // Private timetables
     const classes = await tryCatch(
       session.untis.getOwnTimetableForRange(startDate, endDate),
     )
-    if (classes.isErr()) return err(classes.error.message)
-    const validatedClasses = LessonType(classes.value)
-    if (validatedClasses instanceof type.errors)
-      return err(validatedClasses.summary)
-    return ok(validatedClasses)
+    if (classes.isOk()) {
+      const validatedClasses = LessonsType(classes.value)
+      if (!(validatedClasses instanceof type.errors))
+        return ok(validatedClasses)
+    }
+    // if range failed get each day individually
+    let returnTimetable: typeof LessonsType.infer = []
+    for (
+      let date = new Date(startDate);
+      date <= endDate;
+      date.setDate(date.getDate() + 1)
+    ) {
+      const dayTimetable = await tryCatch(
+        session.untis.getOwnTimetableForRange(date, date),
+      )
+      if (dayTimetable.isOk()) {
+        const validatedDayTimetable = LessonType(dayTimetable)
+        if (!(validatedDayTimetable instanceof type.errors))
+          returnTimetable.push(validatedDayTimetable)
+      }
+    }
+    return ok(returnTimetable)
   }
 
   return {
@@ -245,7 +284,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           date: Result<Date, Error>
           startTime: Result<Date, Error>
           endTime: Result<Date, Error>
-          lesson: Unarray<typeof LessonType.infer>
+          lesson: typeof LessonType.infer
           homeworkStart: typeof HomeworkType.infer.homeworks
           homeworkEnd: typeof HomeworkType.infer.homeworks
         }[],
