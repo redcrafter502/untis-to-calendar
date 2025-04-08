@@ -32,6 +32,11 @@ const AccessByIdSecret = type(AccessByIdBase, "&", {
   secret: "string",
 });
 
+export type AccessById =
+  | typeof AccessByIdPublic.infer
+  | typeof AccessByIdPassword.infer
+  | typeof AccessByIdSecret.infer;
+
 export const QUERIES = {
   async getAccessById(
     id: string,
