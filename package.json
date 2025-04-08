@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.12.0",
+    "@upstash/redis": "^1.34.7",
     "arktype": "^2.1.17",
     "neverthrow": "^8.2.0",
     "next": "^15.2.4",
