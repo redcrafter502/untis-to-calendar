@@ -1,163 +1,163 @@
-import webuntis from 'webuntis'
-import { type } from 'arktype'
-import { ok, err, Result } from 'neverthrow'
-import { authenticator as Authenticator } from 'otplib'
-import { tryCatch } from './try-catch'
+import webuntis from "webuntis";
+import { type } from "arktype";
+import { ok, err, Result } from "neverthrow";
+import { authenticator as Authenticator } from "otplib";
+import { tryCatch } from "./try-catch";
 
 type GetUntisProps = {
-  url: string
-  school: string
-  timezone: string
+  url: string;
+  school: string;
+  timezone: string;
   auth:
     | {
-        type: 'password'
-        username: string
-        password: string
+        type: "password";
+        username: string;
+        password: string;
       }
     | {
-        type: 'secret'
-        username: string
-        secret: string
+        type: "secret";
+        username: string;
+        secret: string;
       }
     | {
-        type: 'public'
-        classId?: number
-      }
-}
+        type: "public";
+        classId?: number;
+      };
+};
 
 const SessionInformationType = type({
-  'klasseId?': 'number',
-  'personId?': 'number',
-  'sessionId?': 'string',
-  'personType?': 'number',
-  'jwt_token?': 'string',
-})
+  "klasseId?": "number",
+  "personId?": "number",
+  "sessionId?": "string",
+  "personType?": "number",
+  "jwt_token?": "string",
+});
 
 const SchoolYearType = type({
-  name: 'string',
-  id: 'number',
-  startDate: 'Date',
-  endDate: 'Date',
-})
+  name: "string",
+  id: "number",
+  startDate: "Date",
+  endDate: "Date",
+});
 
 const ClassType = type(
   {
-    id: 'number',
-    name: 'string',
-    longName: 'string',
-    active: 'boolean',
-    'foreColor?': 'string',
-    'backColor?': 'string',
-    'did?': 'number',
-    'teacher1?': 'number',
-    'teacher2?': 'number',
+    id: "number",
+    name: "string",
+    longName: "string",
+    active: "boolean",
+    "foreColor?": "string",
+    "backColor?": "string",
+    "did?": "number",
+    "teacher1?": "number",
+    "teacher2?": "number",
   },
-  '[]',
-)
+  "[]",
+);
 
 const ShortDataType = type(
   {
-    id: 'number',
-    name: 'string',
-    'longname?': 'string',
-    'orgname?': 'string', // Replacement if original is not available
-    'ordid?': 'number',
+    id: "number",
+    name: "string",
+    "longname?": "string",
+    "orgname?": "string", // Replacement if original is not available
+    "ordid?": "number",
   },
-  '[]',
-)
+  "[]",
+);
 
 const LessonType = type({
-  id: 'number',
-  date: 'number',
-  startTime: 'number',
-  endTime: 'number',
-  'kl?': ShortDataType,
-  'te?': ShortDataType,
-  'su?': ShortDataType,
-  'ro?': ShortDataType,
-  'lstext?': 'string',
-  'lsnumber?': 'number',
-  'activityType?': '"Unterricht" | string',
-  'code?': '"cancelled" | "irregular"',
-  'info?': 'string',
-  'substText?': 'string',
-  'statflags?': 'string',
-  'sg?': 'string',
-  'bgRemark?': 'string',
-  'bkText?': 'string',
-})
+  id: "number",
+  date: "number",
+  startTime: "number",
+  endTime: "number",
+  "kl?": ShortDataType,
+  "te?": ShortDataType,
+  "su?": ShortDataType,
+  "ro?": ShortDataType,
+  "lstext?": "string",
+  "lsnumber?": "number",
+  "activityType?": '"Unterricht" | string',
+  "code?": '"cancelled" | "irregular"',
+  "info?": "string",
+  "substText?": "string",
+  "statflags?": "string",
+  "sg?": "string",
+  "bgRemark?": "string",
+  "bkText?": "string",
+});
 
-const LessonsType = type(LessonType, '[]')
+const LessonsType = type(LessonType, "[]");
 
 const HomeworkType = type({
   records: type(
     {
-      homeworkId: 'number',
-      teacherId: 'number',
-      elementIds: 'number[]',
+      homeworkId: "number",
+      teacherId: "number",
+      elementIds: "number[]",
     },
-    '[]',
+    "[]",
   ),
   homeworks: type(
     {
-      id: 'number',
-      lessonId: 'number',
-      date: 'number',
-      dueDate: 'number',
-      text: 'string',
-      remark: 'string',
-      completed: 'boolean',
-      attachments: 'unknown[]',
+      id: "number",
+      lessonId: "number",
+      date: "number",
+      dueDate: "number",
+      text: "string",
+      remark: "string",
+      completed: "boolean",
+      attachments: "unknown[]",
     },
-    '[]',
+    "[]",
   ),
   teachers: type(
     {
-      id: 'number',
-      name: 'string',
+      id: "number",
+      name: "string",
     },
-    '[]',
+    "[]",
   ),
   lessons: type(
     {
-      id: 'number',
-      subject: 'string',
+      id: "number",
+      subject: "string",
       lessonType: '"Unterricht" | string',
     },
-    '[]',
+    "[]",
   ),
-})
+});
 
 const ExamType = type({
-  id: 'number',
-  examType: 'string',
-  name: 'string',
-  studentClass: 'string[]',
+  id: "number",
+  examType: "string",
+  name: "string",
+  studentClass: "string[]",
   assignedStudents: type(
     {
-      klasse: { id: 'number', name: 'string' },
-      displayName: 'string',
-      id: 'number',
+      klasse: { id: "number", name: "string" },
+      displayName: "string",
+      id: "number",
     },
-    '[]',
+    "[]",
   ),
-  examDate: 'number',
-  startTime: 'number',
-  endTime: 'number',
-  subject: 'string',
-  teachers: 'string[]',
-  'location?': 'string',
-  rooms: 'string[]',
-  text: 'string',
-  'grade?': 'string',
-})
+  examDate: "number",
+  startTime: "number",
+  endTime: "number",
+  subject: "string",
+  teachers: "string[]",
+  "location?": "string",
+  rooms: "string[]",
+  text: "string",
+  "grade?": "string",
+});
 
-const ExamsType = type(ExamType, '[]')
+const ExamsType = type(ExamType, "[]");
 
 type Session = {
-  session: typeof SessionInformationType.infer
-  untis: webuntis.Base
-}
+  session: typeof SessionInformationType.infer;
+  untis: webuntis.Base;
+};
 
 export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
   async function getTimetable(
@@ -166,8 +166,8 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     endDate: Date,
   ): Promise<Result<typeof LessonsType.infer, string>> {
     // Public timetables
-    if (auth.type === 'public') {
-      if (!auth.classId) return err('No classId provided for public auth.')
+    if (auth.type === "public") {
+      if (!auth.classId) return err("No classId provided for public auth.");
       const classes = await tryCatch(
         session.untis.getTimetableForRange(
           startDate,
@@ -175,14 +175,14 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
           auth.classId,
           webuntis.WebUntisElementType.CLASS,
         ),
-      )
+      );
       if (classes.isOk()) {
-        const validatedClasses = LessonsType(classes.value)
+        const validatedClasses = LessonsType(classes.value);
         if (!(validatedClasses instanceof type.errors))
-          return ok(validatedClasses)
+          return ok(validatedClasses);
       }
       // if range failed get each day individually
-      let returnTimetable: typeof LessonsType.infer = []
+      const returnTimetable: typeof LessonsType.infer = [];
       for (
         let date = new Date(startDate);
         date <= endDate;
@@ -195,26 +195,26 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
             auth.classId,
             webuntis.WebUntisElementType.CLASS,
           ),
-        )
+        );
         if (dayTimetable.isOk()) {
-          const validatedDayTimetable = LessonType(dayTimetable.value)
+          const validatedDayTimetable = LessonType(dayTimetable.value);
           if (!(validatedDayTimetable instanceof type.errors))
-            returnTimetable.push(validatedDayTimetable)
+            returnTimetable.push(validatedDayTimetable);
         }
       }
-      return ok(returnTimetable)
+      return ok(returnTimetable);
     }
     // Private timetables
     const classes = await tryCatch(
       session.untis.getOwnTimetableForRange(startDate, endDate),
-    )
+    );
     if (classes.isOk()) {
-      const validatedClasses = LessonsType(classes.value)
+      const validatedClasses = LessonsType(classes.value);
       if (!(validatedClasses instanceof type.errors))
-        return ok(validatedClasses)
+        return ok(validatedClasses);
     }
     // if range failed get each day individually
-    let returnTimetable: typeof LessonsType.infer = []
+    const returnTimetable: typeof LessonsType.infer = [];
     for (
       let date = new Date(startDate);
       date <= endDate;
@@ -222,14 +222,14 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     ) {
       const dayTimetable = await tryCatch(
         session.untis.getOwnTimetableForRange(date, date),
-      )
+      );
       if (dayTimetable.isOk()) {
-        const validatedDayTimetable = LessonType(dayTimetable.value)
+        const validatedDayTimetable = LessonType(dayTimetable.value);
         if (!(validatedDayTimetable instanceof type.errors))
-          returnTimetable.push(validatedDayTimetable)
+          returnTimetable.push(validatedDayTimetable);
       }
     }
-    return ok(returnTimetable)
+    return ok(returnTimetable);
   }
 
   async function getHomework(
@@ -239,83 +239,83 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
   ): Promise<Result<typeof HomeworkType.infer, string>> {
     const homework = await tryCatch(
       session.untis.getHomeWorksFor(startDate, endDate),
-    )
+    );
     if (homework.isErr())
-      return ok({ records: [], homeworks: [], teachers: [], lessons: [] })
-    const validatedHomework = HomeworkType(homework.value)
+      return ok({ records: [], homeworks: [], teachers: [], lessons: [] });
+    const validatedHomework = HomeworkType(homework.value);
     if (validatedHomework instanceof type.errors)
-      return err(validatedHomework.summary)
-    return ok(validatedHomework)
+      return err(validatedHomework.summary);
+    return ok(validatedHomework);
   }
 
   return {
     async login(): Promise<Result<Session, string>> {
       switch (auth.type) {
-        case 'password': {
+        case "password": {
           const untis = new webuntis.WebUntis(
             school,
             auth.username,
             auth.password,
             url,
-          )
-          const session = await tryCatch(untis.login())
-          if (session.isErr()) return err(session.error.message)
-          const validatedSession = SessionInformationType(session.value)
+          );
+          const session = await tryCatch(untis.login());
+          if (session.isErr()) return err(session.error.message);
+          const validatedSession = SessionInformationType(session.value);
           if (validatedSession instanceof type.errors)
-            return err(validatedSession.summary)
-          return ok({ session: validatedSession, untis })
+            return err(validatedSession.summary);
+          return ok({ session: validatedSession, untis });
         }
-        case 'secret': {
+        case "secret": {
           const untis = new webuntis.WebUntisSecretAuth(
             school,
             auth.username,
             auth.secret,
             url,
-            'custom-identity',
+            "custom-identity",
             Authenticator,
-          )
-          const session = await tryCatch(untis.login())
-          if (session.isErr()) return err(session.error.message)
-          const validatedSession = SessionInformationType(session.value)
+          );
+          const session = await tryCatch(untis.login());
+          if (session.isErr()) return err(session.error.message);
+          const validatedSession = SessionInformationType(session.value);
           if (validatedSession instanceof type.errors)
-            return err(validatedSession.summary)
-          return ok({ session: validatedSession, untis })
+            return err(validatedSession.summary);
+          return ok({ session: validatedSession, untis });
         }
-        case 'public': {
-          const untis = new webuntis.WebUntisAnonymousAuth(school, url)
-          const session = await tryCatch(untis.login())
-          if (session.isErr()) return err(session.error.message)
-          const validatedSession = SessionInformationType(session.value)
+        case "public": {
+          const untis = new webuntis.WebUntisAnonymousAuth(school, url);
+          const session = await tryCatch(untis.login());
+          if (session.isErr()) return err(session.error.message);
+          const validatedSession = SessionInformationType(session.value);
           if (validatedSession instanceof type.errors)
-            return err(validatedSession.summary)
-          return ok({ session: validatedSession, untis })
+            return err(validatedSession.summary);
+          return ok({ session: validatedSession, untis });
         }
       }
     },
     async logout(session: Session): Promise<Result<void, string>> {
-      const logoutResponse = await tryCatch(session.untis.logout())
-      if (logoutResponse.isErr()) return err(logoutResponse.error.message)
-      return ok()
+      const logoutResponse = await tryCatch(session.untis.logout());
+      if (logoutResponse.isErr()) return err(logoutResponse.error.message);
+      return ok();
     },
     async getClassesForCurrentSchoolYear(
       session: Session,
     ): Promise<Result<typeof ClassType.infer, string>> {
       const schoolyearData = await tryCatch(
         session.untis.getCurrentSchoolyear(),
-      )
-      if (schoolyearData.isErr()) return err(schoolyearData.error.message)
-      const validatedSchoolyearData = SchoolYearType(schoolyearData.value)
+      );
+      if (schoolyearData.isErr()) return err(schoolyearData.error.message);
+      const validatedSchoolyearData = SchoolYearType(schoolyearData.value);
       if (validatedSchoolyearData instanceof type.errors)
-        return err(validatedSchoolyearData.summary)
+        return err(validatedSchoolyearData.summary);
 
       const classesData = await tryCatch(
         session.untis.getClasses(true, validatedSchoolyearData.id),
-      )
-      if (classesData.isErr()) return err(classesData.error.message)
-      const validatedClassesData = ClassType(classesData.value)
+      );
+      if (classesData.isErr()) return err(classesData.error.message);
+      const validatedClassesData = ClassType(classesData.value);
       if (validatedClassesData instanceof type.errors)
-        return err(validatedClassesData.summary)
-      return ok(validatedClassesData)
+        return err(validatedClassesData.summary);
+      return ok(validatedClassesData);
     },
     async getTimetableWithHomework(
       startDate: Date,
@@ -324,29 +324,29 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
     ): Promise<
       Result<
         {
-          startTime: Result<Date, Error>
-          endTime: Result<Date, Error>
-          lesson: typeof LessonType.infer
-          homeworkStart: typeof HomeworkType.infer.homeworks
-          homeworkEnd: typeof HomeworkType.infer.homeworks
+          startTime: Result<Date, Error>;
+          endTime: Result<Date, Error>;
+          lesson: typeof LessonType.infer;
+          homeworkStart: typeof HomeworkType.infer.homeworks;
+          homeworkEnd: typeof HomeworkType.infer.homeworks;
         }[],
         string
       >
     > {
-      const startDateInTimezone = setDateToTimezone(startDate, timezone)
-      const endDateInTimezone = setDateToTimezone(endDate, timezone)
+      const startDateInTimezone = setDateToTimezone(startDate, timezone);
+      const endDateInTimezone = setDateToTimezone(endDate, timezone);
       const timetable = await getTimetable(
         session,
         startDateInTimezone,
         endDateInTimezone,
-      )
-      if (timetable.isErr()) return err(timetable.error)
+      );
+      if (timetable.isErr()) return err(timetable.error);
       const homeworkData = await getHomework(
         session,
         startDateInTimezone,
         endDateInTimezone,
-      )
-      if (homeworkData.isErr()) return err(homeworkData.error)
+      );
+      if (homeworkData.isErr()) return err(homeworkData.error);
 
       const homeworkWithLesson = homeworkData.value.homeworks.map(
         (homework) => ({
@@ -355,7 +355,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
             (lesson) => lesson.id === homework.lessonId,
           ),
         }),
-      )
+      );
 
       const timetableWithHomework = timetable.value.map((lesson) => {
         const homeworkForLesson = homeworkWithLesson.filter(
@@ -366,7 +366,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
                 : false) &&
             (homework.homework.date === lesson.date ||
               homework.homework.dueDate === lesson.date),
-        )
+        );
         if (homeworkForLesson.length > 0) {
           return {
             lesson,
@@ -376,10 +376,10 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
             homeworkEnd: homeworkForLesson
               .map((homework) => homework.homework)
               .filter((homework) => homework.dueDate === lesson.date),
-          }
+          };
         }
-        return { lesson, homeworkStart: [], homeworkEnd: [] }
-      })
+        return { lesson, homeworkStart: [], homeworkEnd: [] };
+      });
       const timetableWithTimezones = timetableWithHomework.map((lesson) => {
         const lessonWithTimezones = {
           ...lesson,
@@ -393,42 +393,42 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
             lesson.lesson.date,
             lesson.lesson.endTime,
           ),
-        }
-        return lessonWithTimezones
-      })
-      return ok(timetableWithTimezones)
+        };
+        return lessonWithTimezones;
+      });
+      return ok(timetableWithTimezones);
     },
     async getExamsForCurrentSchoolyear(session: Session): Promise<
       Result<
         {
-          startTime: Result<Date, Error>
-          endTime: Result<Date, Error>
-          exam: typeof ExamType.infer
+          startTime: Result<Date, Error>;
+          endTime: Result<Date, Error>;
+          exam: typeof ExamType.infer;
         }[],
         string
       >
     > {
-      if (auth.type === 'public')
-        return err('Getting Exams is not supported with public auth.')
+      if (auth.type === "public")
+        return err("Getting Exams is not supported with public auth.");
       const schoolyearData = await tryCatch(
         session.untis.getCurrentSchoolyear(),
-      )
+      );
 
-      if (schoolyearData.isErr()) return err(schoolyearData.error.message)
-      const validatedSchoolyearData = SchoolYearType(schoolyearData.value)
+      if (schoolyearData.isErr()) return err(schoolyearData.error.message);
+      const validatedSchoolyearData = SchoolYearType(schoolyearData.value);
       if (validatedSchoolyearData instanceof type.errors)
-        return err(validatedSchoolyearData.summary)
+        return err(validatedSchoolyearData.summary);
 
       const exams = await tryCatch(
         session.untis.getExamsForRange(
           validatedSchoolyearData.startDate,
           validatedSchoolyearData.endDate,
         ),
-      )
-      if (exams.isErr()) return err(exams.error.message)
-      const validatedExams = ExamsType(exams.value)
+      );
+      if (exams.isErr()) return err(exams.error.message);
+      const validatedExams = ExamsType(exams.value);
       if (validatedExams instanceof type.errors)
-        return err(validatedExams.summary)
+        return err(validatedExams.summary);
 
       return ok(
         validatedExams.map((exam) => ({
@@ -444,13 +444,13 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
             exam.endTime,
           ),
         })),
-      )
+      );
     },
-  }
+  };
 }
 
 function setDateToTimezone(date: Date, timezone: string): Date {
-  return new Date(date.toLocaleString('en-US', { timeZone: timezone }))
+  return new Date(date.toLocaleString("en-US", { timeZone: timezone }));
 }
 
 function convertUntisDateToDate(
@@ -458,51 +458,51 @@ function convertUntisDateToDate(
   untisDate: number,
   untisTime: number,
 ): Result<Date, Error> {
-  const dateString = String(untisDate)
+  const dateString = String(untisDate);
 
   if (dateString.length !== 8) {
     return err(
-      new Error('Invalid date format. Date must be in YYYYMMDD format.'),
-    )
+      new Error("Invalid date format. Date must be in YYYYMMDD format."),
+    );
   }
 
-  const year = parseInt(dateString.slice(0, 4))
-  const month = parseInt(dateString.slice(4, 6)) - 1
-  const day = parseInt(dateString.slice(6, 8))
+  const year = parseInt(dateString.slice(0, 4));
+  const month = parseInt(dateString.slice(4, 6)) - 1;
+  const day = parseInt(dateString.slice(6, 8));
 
-  let hour = 0
-  let minute = 0
+  let hour = 0;
+  let minute = 0;
 
-  const timeString = String(untisTime).padStart(4, '0')
+  const timeString = String(untisTime).padStart(4, "0");
 
   if (timeString.length === 4) {
-    hour = parseInt(timeString.slice(0, 2))
-    minute = parseInt(timeString.slice(2, 4))
+    hour = parseInt(timeString.slice(0, 2));
+    minute = parseInt(timeString.slice(2, 4));
 
     if (isNaN(hour) || isNaN(minute)) {
-      return err(new Error('Invalid time value.'))
+      return err(new Error("Invalid time value."));
     }
   }
 
   try {
     // Create a Date object in the specified timezone
-    const dateInTimezone = new Date(year, month, day, hour, minute)
+    const dateInTimezone = new Date(year, month, day, hour, minute);
 
     // Use toLocaleString to ensure the Date object is interpreted in the specified timezone.
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    const formatter = new Intl.DateTimeFormat("en-US", {
       timeZone: timezone,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      timeZoneName: 'short',
-    })
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZoneName: "short",
+    });
 
-    const dateStringInTimezone = formatter.format(dateInTimezone)
-    return ok(new Date(dateStringInTimezone))
+    const dateStringInTimezone = formatter.format(dateInTimezone);
+    return ok(new Date(dateStringInTimezone));
   } catch (error) {
-    return err(error as Error)
+    return err(error as Error);
   }
 }
