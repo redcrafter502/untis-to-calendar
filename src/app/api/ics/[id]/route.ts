@@ -182,6 +182,10 @@ function getLessonCalEvents(lessons: LessonsWithHomework) {
       summary: summaryWithInfoMark,
       description,
       location,
+      attachments: [
+        ...lesson.homeworkStart.flatMap((v) => v.attachments as string[]),
+        ...lesson.homeworkEnd.flatMap((v) => v.attachments as string[]),
+      ],
       busystatus:
         lesson.lesson.code === "cancelled"
           ? ICalEventBusyStatus.FREE
@@ -203,7 +207,6 @@ const getCurrentAndNextWeekRange = () => {
 
   // Calculate the start of the current week (Monday)
   const startOfCurrentWeek = new Date(now);
-  // !!!! TODO: This is not correct, it should be Monday of the current week !!!! CHANGE THIS to + 1
   startOfCurrentWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
 
   // Calculate the end of the next week (Sunday)
