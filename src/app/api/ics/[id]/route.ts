@@ -1,5 +1,6 @@
 import { AccessById, QUERIES } from "@/db/queries";
 import { getUntis } from "@/lib/untis";
+import ical from "ical-generator";
 
 export async function GET(
   _request: Request,
@@ -16,11 +17,61 @@ export async function GET(
   });
   const session = await untis.login();
   if (session.isErr())
-    return new Response("Login to Untis failed", { status: 401 });
+    return new Response("Login to Untis failed", { status: 500 });
+
+  const exams = await untis.getExamsForCurrentSchoolyear(session.value);
 
   await untis.logout(session.value);
+  if (exams.isErr())
+    return new Response("Failed to get exams", { status: 500 });
   console.log(data.value);
-  return new Response(`Hello ${id}!`);
+  const calendar = ical({ name: data.value.name });
+  exams.value.forEach((exam) => {
+    if (exam.startTime.isErr()) return;
+    if (exam.endTime.isErr()) return;
+    const summary = exam.exam.name
+      ? `${exam.exam.name} (Exam)`
+      : "No exam title founs";
+    const location = [exam.exam.location, ...exam.exam.rooms]
+      .filter((v) => v)
+      .join(", ");
+    const description = [
+      exam.exam.examType,
+      exam.exam.subject,
+      ...exam.exam.teachers.join(", "),
+      exam.exam.grade ? `Grade: ${exam.exam.grade}` : undefined,
+      exam.exam.text,
+    ]
+      .filter((v) => v)
+      .join("\n");
+
+    calendar.createEvent({
+      start: exam.startTime.value,
+      end: exam.endTime.value,
+      summary,
+      description,
+      location,
+    });
+  });
+
+  const startTime = new Date();
+  const endTime = new Date();
+  endTime.setHours(startTime.getHours() + 1);
+  calendar.createEvent({
+    start: startTime,
+    end: endTime,
+    summary: "Example Event",
+    description: "It works ;)",
+    location: "my room",
+    url: "http://sebbo.net/",
+  });
+
+  return new Response(calendar.toString(), {
+    headers: {
+      "Content-Type": "text/calendar; charset=utf-8",
+      "Content-Disposition": `attachment; filename="${data.value.name}.ics"`,
+    },
+  });
 }
 
 function getAuth(access: AccessById):
