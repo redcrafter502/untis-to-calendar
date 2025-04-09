@@ -8,6 +8,7 @@ const AccessByIdBase = type({
   name: "string",
   domain: "string",
   school: "string",
+  timezone: "string",
 });
 
 const AccessById = type(AccessByIdBase, "&", {

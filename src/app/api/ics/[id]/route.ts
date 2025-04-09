@@ -1,5 +1,5 @@
 import { AccessById, QUERIES } from "@/db/queries";
-import { getUntis } from "@/lib/untis";
+import { type ExamsForCurrentSchoolYear, getUntis } from "@/lib/untis";
 import ical from "ical-generator";
 
 export async function GET(
@@ -18,53 +18,36 @@ export async function GET(
   const session = await untis.login();
   if (session.isErr())
     return new Response("Login to Untis failed", { status: 500 });
-  const exams = await untis.getExamsForCurrentSchoolyear(session.value);
-  await untis.logout(session.value);
-  if (exams.isErr())
-    return new Response("Failed to get exams", { status: 500 });
 
   const calendar = ical({ name: data.value.name });
-  if (data.value.authType === "password" || data.value.authType === "secret") {
-    exams.value.forEach((exam) => {
-      if (exam.startTime.isErr()) return;
-      if (exam.endTime.isErr()) return;
-      const summary = exam.exam.name
-        ? `${exam.exam.name} (Exam)`
-        : "No exam title founs";
-      const location = [exam.exam.location, ...exam.exam.rooms]
-        .filter((v) => v)
-        .join(", ");
-      const description = [
-        exam.exam.examType,
-        exam.exam.subject,
-        ...exam.exam.teachers.join(", "),
-        exam.exam.grade ? `Grade: ${exam.exam.grade}` : undefined,
-        exam.exam.text,
-      ]
-        .filter((v) => v)
-        .join("\n");
 
-      calendar.createEvent({
-        start: exam.startTime.value,
-        end: exam.endTime.value,
-        summary,
-        description,
-        location,
-      });
+  if (data.value.authType === "password" || data.value.authType === "secret") {
+    const exams = await untis.getExamsForCurrentSchoolyear(session.value);
+    if (exams.isErr()) {
+      await untis.logout(session.value);
+      return new Response("Failed to get exams", { status: 500 });
+    }
+    getExamCalEvents(exams.value).forEach((event) => {
+      if (!event) return;
+      calendar.createEvent(event);
     });
   }
 
-  const startTime = new Date();
-  const endTime = new Date();
-  endTime.setHours(startTime.getHours() + 1);
-  calendar.createEvent({
-    start: startTime,
-    end: endTime,
-    summary: "Example Event",
-    description: "It works ;)",
-    location: "my room",
-    url: "http://sebbo.net/",
+  const lessons = await untis.getTimetableWithHomework(
+    new Date(),
+    new Date(),
+    session.value,
+  );
+  if (lessons.isErr()) {
+    await untis.logout(session.value);
+    return new Response("Failed to get lessons", { status: 500 });
+  }
+  getLessonCalEvents(lessons.value).forEach((event) => {
+    if (!event) return;
+    calendar.createEvent(event);
   });
+
+  await untis.logout(session.value);
 
   return new Response(calendar.toString(), {
     headers: {
@@ -105,4 +88,40 @@ function getAuth(access: AccessById):
         secret: access.secret,
       };
   }
+}
+
+function getExamCalEvents(exams: ExamsForCurrentSchoolYear) {
+  return exams.map((exam) => {
+    if (exam.startTime.isErr()) return;
+    if (exam.endTime.isErr()) return;
+    const summary = exam.exam.name
+      ? `${exam.exam.name} (Exam)`
+      : "No exam title founs";
+    const location = [exam.exam.location, ...exam.exam.rooms]
+      .filter((v) => v)
+      .join(", ");
+    const description = [
+      exam.exam.examType,
+      exam.exam.subject,
+      ...exam.exam.teachers.join(", "),
+      exam.exam.grade ? `Grade: ${exam.exam.grade}` : undefined,
+      exam.exam.text,
+    ]
+      .filter((v) => v)
+      .join("\n");
+
+    return {
+      start: exam.startTime.value,
+      end: exam.endTime.value,
+      summary,
+      description,
+      location,
+    };
+  });
+}
+
+function getLessonCalEvents(lessons: any) {
+  lessons.forEach((lesson) => {
+    return {};
+  });
 }
