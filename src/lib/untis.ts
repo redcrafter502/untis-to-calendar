@@ -1,4 +1,4 @@
-import webuntis from "webuntis";
+import * as webuntis from "webuntis";
 import { type } from "arktype";
 import { ok, err, Result } from "neverthrow";
 import { authenticator as Authenticator } from "otplib";

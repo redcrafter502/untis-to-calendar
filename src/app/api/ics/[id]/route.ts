@@ -18,6 +18,7 @@ export async function GET(
   if (session.isErr())
     return new Response("Login to Untis failed", { status: 401 });
 
+  await untis.logout(session.value);
   console.log(data.value);
   return new Response(`Hello ${id}!`);
 }
