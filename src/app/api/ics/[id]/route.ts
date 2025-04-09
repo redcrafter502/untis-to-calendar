@@ -1,5 +1,9 @@
 import { AccessById, QUERIES } from "@/db/queries";
-import { type ExamsForCurrentSchoolYear, getUntis } from "@/lib/untis";
+import {
+  type ExamsForCurrentSchoolYear,
+  getUntis,
+  type LessonsWithHomework,
+} from "@/lib/untis";
 import ical from "ical-generator";
 
 export async function GET(
@@ -33,9 +37,10 @@ export async function GET(
     });
   }
 
+  const { startOfCurrentWeek, endOfNextWeek } = getCurrentAndNextWeekRange();
   const lessons = await untis.getTimetableWithHomework(
-    new Date(),
-    new Date(),
+    startOfCurrentWeek,
+    endOfNextWeek,
     session.value,
   );
   if (lessons.isErr()) {
@@ -120,8 +125,47 @@ function getExamCalEvents(exams: ExamsForCurrentSchoolYear) {
   });
 }
 
-function getLessonCalEvents(lessons: any) {
-  lessons.forEach((lesson) => {
-    return {};
+function getLessonCalEvents(lessons: LessonsWithHomework) {
+  return lessons.map((lesson) => {
+    if (lesson.startTime.isErr()) return;
+    if (lesson.endTime.isErr()) return;
+    const summary = [
+      ...(lesson.lesson.su ? lesson.lesson.su.map((v) => v.name) : []),
+      lesson.lesson.lstext,
+    ]
+      .filter((v) => v)
+      .join(", ");
+    const location = [
+      ...(lesson.lesson.ro
+        ? lesson.lesson.ro.map((v) => {
+            if (!v.orgname) return `${v.longname} - ${v.name}`;
+            return `${v.longname} - ${v.name} (${v.orgname})`;
+          })
+        : []),
+    ].join(", ");
+    const description = ["description"].filter((v) => v).join("\n");
+
+    return {
+      start: lesson.startTime.value,
+      end: lesson.endTime.value,
+      summary,
+      description,
+      location,
+    };
   });
 }
+
+const getCurrentAndNextWeekRange = () => {
+  const now = new Date();
+
+  // Calculate the start of the current week (Monday)
+  const startOfCurrentWeek = new Date(now);
+  // !!!! TODO: This is not correct, it should be Monday of the current week !!!! CHANGE THIS to + 1
+  startOfCurrentWeek.setDate(now.getDate() - now.getDay() - 6); // Monday
+
+  // Calculate the end of the next week (Sunday)
+  const endOfNextWeek = new Date(startOfCurrentWeek);
+  endOfNextWeek.setDate(startOfCurrentWeek.getDate() + 13); // Next week's Sunday
+
+  return { startOfCurrentWeek, endOfNextWeek };
+};

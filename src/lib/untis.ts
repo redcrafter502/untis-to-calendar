@@ -60,7 +60,7 @@ const ShortDataType = type(
     id: "number",
     name: "string",
     "longname?": "string",
-    "orgname?": "string", // Replacement if original is not available
+    "orgname?": "string", // Orinal if replacement is there
     "ordid?": "number",
   },
   "[]",
@@ -163,6 +163,14 @@ export type ExamsForCurrentSchoolYear = {
   startTime: Result<Date, Error>;
   endTime: Result<Date, Error>;
   exam: typeof ExamType.infer;
+}[];
+
+export type LessonsWithHomework = {
+  startTime: Result<Date, Error>;
+  endTime: Result<Date, Error>;
+  lesson: typeof LessonType.infer;
+  homeworkStart: typeof HomeworkType.infer.homeworks;
+  homeworkEnd: typeof HomeworkType.infer.homeworks;
 }[];
 
 export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
@@ -327,18 +335,7 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
       startDate: Date,
       endDate: Date,
       session: Session,
-    ): Promise<
-      Result<
-        {
-          startTime: Result<Date, Error>;
-          endTime: Result<Date, Error>;
-          lesson: typeof LessonType.infer;
-          homeworkStart: typeof HomeworkType.infer.homeworks;
-          homeworkEnd: typeof HomeworkType.infer.homeworks;
-        }[],
-        string
-      >
-    > {
+    ): Promise<Result<LessonsWithHomework, string>> {
       const startDateInTimezone = setDateToTimezone(startDate, timezone);
       const endDateInTimezone = setDateToTimezone(endDate, timezone);
       const timetable = await getTimetable(
