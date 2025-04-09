@@ -4,7 +4,11 @@ import {
   getUntis,
   type LessonsWithHomework,
 } from "@/lib/untis";
-import ical from "ical-generator";
+import ical, {
+  ICalEventBusyStatus,
+  ICalEventStatus,
+  ICalEventTransparency,
+} from "ical-generator";
 
 export async function GET(
   _request: Request,
@@ -143,14 +147,53 @@ function getLessonCalEvents(lessons: LessonsWithHomework) {
           })
         : []),
     ].join(", ");
-    const description = ["description"].filter((v) => v).join("\n");
+    const description = [
+      summary,
+      (lesson.lesson.kl ? lesson.lesson.kl.map((v) => v.name) : []).join(", "),
+      lesson.lesson.activityType,
+      lesson.lesson.info,
+      lesson.lesson.substText,
+      lesson.homeworkEnd.length > 0 ? "Homework to this lesson:" : undefined,
+      lesson.homeworkEnd.map((v) => {
+        if (!v.remark) return `${v.completed ? "✅" : "-"} ${v.text}`;
+        return `${v.completed ? "✅" : "-"} ${v.text} - ${v.remark}`;
+      }),
+      lesson.homeworkStart.length > 0
+        ? "Homework from this lesson:"
+        : undefined,
+      lesson.homeworkStart.map((v) => {
+        if (!v.remark) return `${v.completed ? "✅" : "-"} ${v.text}`;
+        return `${v.completed ? "✅" : "-"} ${v.text} - ${v.remark}`;
+      }),
+    ]
+      .filter((v) => v)
+      .join("\n");
+
+    const summaryWithInfoMark =
+      lesson.lesson.info ||
+      lesson.homeworkStart.length > 0 ||
+      lesson.homeworkEnd.length > 0
+        ? `ℹ️ ${summary}`
+        : summary;
 
     return {
       start: lesson.startTime.value,
       end: lesson.endTime.value,
-      summary,
+      summary: summaryWithInfoMark,
       description,
       location,
+      busystatus:
+        lesson.lesson.code === "cancelled"
+          ? ICalEventBusyStatus.FREE
+          : ICalEventBusyStatus.BUSY,
+      status:
+        lesson.lesson.code === "cancelled"
+          ? ICalEventStatus.CANCELLED
+          : ICalEventStatus.CONFIRMED,
+      transparency:
+        lesson.lesson.code === "cancelled"
+          ? ICalEventTransparency.TRANSPARENT
+          : ICalEventTransparency.OPAQUE,
     };
   });
 }
@@ -161,7 +204,7 @@ const getCurrentAndNextWeekRange = () => {
   // Calculate the start of the current week (Monday)
   const startOfCurrentWeek = new Date(now);
   // !!!! TODO: This is not correct, it should be Monday of the current week !!!! CHANGE THIS to + 1
-  startOfCurrentWeek.setDate(now.getDate() - now.getDay() - 6); // Monday
+  startOfCurrentWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
 
   // Calculate the end of the next week (Sunday)
   const endOfNextWeek = new Date(startOfCurrentWeek);
