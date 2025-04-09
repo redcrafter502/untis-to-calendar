@@ -159,6 +159,12 @@ type Session = {
   untis: webuntis.Base;
 };
 
+export type ExamsForCurrentSchoolYear = {
+  startTime: Result<Date, Error>;
+  endTime: Result<Date, Error>;
+  exam: typeof ExamType.infer;
+}[];
+
 export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
   async function getTimetable(
     session: Session,
@@ -398,16 +404,9 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
       });
       return ok(timetableWithTimezones);
     },
-    async getExamsForCurrentSchoolyear(session: Session): Promise<
-      Result<
-        {
-          startTime: Result<Date, Error>;
-          endTime: Result<Date, Error>;
-          exam: typeof ExamType.infer;
-        }[],
-        string
-      >
-    > {
+    async getExamsForCurrentSchoolyear(
+      session: Session,
+    ): Promise<Result<ExamsForCurrentSchoolYear, string>> {
       if (auth.type === "public")
         return err("Getting Exams is not supported with public auth.");
       const schoolyearData = await tryCatch(
