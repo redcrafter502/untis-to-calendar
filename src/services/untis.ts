@@ -1,4 +1,4 @@
-import { getUntis } from "@/new-untis/untis-webuntis";
+import { getUntis } from "@/lib/untis";
 import { Result, ok, err } from "neverthrow";
 
 const getCurrentAndNextWeekRange = () => {

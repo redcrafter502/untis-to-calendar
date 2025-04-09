@@ -6,7 +6,6 @@ import { type } from "arktype";
 
 const AccessByIdBase = type({
   name: "string",
-  type: "'ics'",
   domain: "string",
   school: "string",
 });
@@ -49,7 +48,7 @@ export const QUERIES = {
     >
   > {
     const data = await tryCatch(
-      redis.hgetall(`untis-to-calendar:access:${id}`),
+      redis.hgetall(`untis-to-calendar:access:ics:${id}`),
     );
     if (data.isErr()) return err(data.error.message);
     if (data.value === null) return err("No access found");
