@@ -18,41 +18,41 @@ export async function GET(
   const session = await untis.login();
   if (session.isErr())
     return new Response("Login to Untis failed", { status: 500 });
-
   const exams = await untis.getExamsForCurrentSchoolyear(session.value);
-
   await untis.logout(session.value);
   if (exams.isErr())
     return new Response("Failed to get exams", { status: 500 });
-  console.log(data.value);
-  const calendar = ical({ name: data.value.name });
-  exams.value.forEach((exam) => {
-    if (exam.startTime.isErr()) return;
-    if (exam.endTime.isErr()) return;
-    const summary = exam.exam.name
-      ? `${exam.exam.name} (Exam)`
-      : "No exam title founs";
-    const location = [exam.exam.location, ...exam.exam.rooms]
-      .filter((v) => v)
-      .join(", ");
-    const description = [
-      exam.exam.examType,
-      exam.exam.subject,
-      ...exam.exam.teachers.join(", "),
-      exam.exam.grade ? `Grade: ${exam.exam.grade}` : undefined,
-      exam.exam.text,
-    ]
-      .filter((v) => v)
-      .join("\n");
 
-    calendar.createEvent({
-      start: exam.startTime.value,
-      end: exam.endTime.value,
-      summary,
-      description,
-      location,
+  const calendar = ical({ name: data.value.name });
+  if (data.value.authType === "password" || data.value.authType === "secret") {
+    exams.value.forEach((exam) => {
+      if (exam.startTime.isErr()) return;
+      if (exam.endTime.isErr()) return;
+      const summary = exam.exam.name
+        ? `${exam.exam.name} (Exam)`
+        : "No exam title founs";
+      const location = [exam.exam.location, ...exam.exam.rooms]
+        .filter((v) => v)
+        .join(", ");
+      const description = [
+        exam.exam.examType,
+        exam.exam.subject,
+        ...exam.exam.teachers.join(", "),
+        exam.exam.grade ? `Grade: ${exam.exam.grade}` : undefined,
+        exam.exam.text,
+      ]
+        .filter((v) => v)
+        .join("\n");
+
+      calendar.createEvent({
+        start: exam.startTime.value,
+        end: exam.endTime.value,
+        summary,
+        description,
+        location,
+      });
     });
-  });
+  }
 
   const startTime = new Date();
   const endTime = new Date();
