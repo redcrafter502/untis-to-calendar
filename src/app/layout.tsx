@@ -2,7 +2,7 @@ import "./globals.css";
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackServerApp } from "../stack";
 import type { Metadata } from "next";
-import ThemeProvider from "../../components/theme-provider";
+import ThemeProvider from "../components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
