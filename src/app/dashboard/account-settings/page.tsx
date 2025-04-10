@@ -4,7 +4,7 @@ import { Suspense } from "react";
 export default function AccountSettingsPage() {
   return (
     <main>
-      <AccountSettings />
+      <AccountSettings fullPage />
     </main>
   );
 }
