@@ -105,7 +105,7 @@ function getExamCalEvents(exams: ExamsForCurrentSchoolYear) {
     if (exam.endTime.isErr()) return;
     const summary = exam.exam.name
       ? `${exam.exam.name} (Exam)`
-      : "No exam title founs";
+      : "No exam title found";
     const location = [exam.exam.location, ...exam.exam.rooms]
       .filter((v) => v)
       .join(", ");
