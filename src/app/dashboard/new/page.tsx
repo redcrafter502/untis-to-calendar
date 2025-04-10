@@ -18,15 +18,15 @@ import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { Input } from "@/components/ui/input";
 
 const formSchema = type({
-  name: "string",
-  timezone: "string",
-  domain: "string",
-  school: "string",
+  name: "string > 0",
+  timezone: "string > 0",
+  domain: "string > 0",
+  school: "string > 0",
   authType: "'public' | 'password' | 'secret'",
-  "classId?": "string",
-  "username?": "string",
-  "password?": "string",
-  "secret?": "string",
+  "classId?": "string > 0",
+  "username?": "string > 0",
+  "password?": "string > 0",
+  "secret?": "string > 0",
 });
 
 export default function NewAccessPage() {
@@ -83,20 +83,13 @@ function CreateForm({
   const form = useForm<typeof formSchema.infer>({
     resolver: arktypeResolver(formSchema),
     defaultValues: {
+      name: "",
       timezone: defaultTimezone,
       domain: defaultDomain,
       school: defaultSchool,
       authType,
-      ...(defaultUsername
-        ? {
-            username: defaultUsername,
-          }
-        : {}),
-      ...(defaultSecret
-        ? {
-            secret: defaultSecret,
-          }
-        : {}),
+      username: defaultUsername ?? "",
+      secret: defaultSecret ?? "",
     },
   });
 
