@@ -6,15 +6,15 @@ export default function Page() {
   return (
     <div className="w-full p-20 text-center">
       <h1>Hello World</h1>
-      <Button
-        onClick={async () => {
+      <form
+        action={async () => {
           "use server";
           await stackServerApp.getUser({ or: "redirect" });
           redirect("/dashboard");
         }}
       >
-        Get Started
-      </Button>
+        <Button type="submit">Get Started</Button>
+      </form>
     </div>
   );
 }
