@@ -7,14 +7,15 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { stackServerApp } from "@/stack";
-import { ArrowRight, ScanQrCode } from "lucide-react";
+import { ArrowRight, Loader2, ScanQrCode } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export default async function DashboardPage() {
   const user = await stackServerApp.getUser({ or: "redirect" });
   return (
     <main className="mt-4 flex w-full justify-center">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-8">
         <div className="flex w-full flex-col gap-4">
           <h1 className="text-4xl">Create a new Access</h1>
           <Card>
@@ -89,16 +90,35 @@ export default async function DashboardPage() {
           </div>
           <p>QR Code and Public are not yet implemented.</p>
         </div>
-        <div className="w-full">
-          <h1>Dashboard</h1>
+        <div className="flex w-full flex-col gap-4">
+          <h1 className="text-4xl">Your Accesses</h1>
           {((user.serverMetadata?.accesses ?? []) as string[]).map((access) => (
-            <div key={access}>
-              <h2>{access}</h2>
-            </div>
+            <Suspense
+              key={access}
+              fallback={
+                <div>
+                  <Loader2 className="animate-spin" />
+                </div>
+              }
+            >
+              <AccessCard accessId={access} />
+            </Suspense>
           ))}
         </div>
       </div>
     </main>
+  );
+}
+
+async function AccessCard({ accessId }: { accessId: string }) {
+  await new Promise((r) => setTimeout(r, 1000 * Math.random())); // sleep 1s
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{accessId}</CardTitle>
+      </CardHeader>
+    </Card>
   );
 }
 
