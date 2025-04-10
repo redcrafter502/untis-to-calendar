@@ -88,7 +88,7 @@ function CreateForm({
 
   async function onSubmit(values: typeof formSchema.infer) {
     const result = await createAccess(values);
-    if (result.error) return toast.error(result.error);
+    if (result?.error) return toast.error(result.error);
     router.push("/dashboard");
   }
 

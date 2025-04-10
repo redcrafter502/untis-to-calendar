@@ -15,18 +15,18 @@ const AccessById = type(AccessByIdBase, "&", {
   authType: "'public' | 'password' | 'secret'",
 });
 
-const AccessByIdPublic = type(AccessByIdBase, "&", {
+export const AccessByIdPublic = type(AccessByIdBase, "&", {
   authType: "'public'",
   classId: "number",
 });
 
-const AccessByIdPassword = type(AccessByIdBase, "&", {
+export const AccessByIdPassword = type(AccessByIdBase, "&", {
   authType: "'password'",
   username: "string",
   password: "string",
 });
 
-const AccessByIdSecret = type(AccessByIdBase, "&", {
+export const AccessByIdSecret = type(AccessByIdBase, "&", {
   authType: "'secret'",
   username: "string",
   secret: "string",
@@ -74,5 +74,18 @@ export const QUERIES = {
       return ok(validatedDataSecret);
     }
     return err("Unknown auth type");
+  },
+};
+
+export const MUTATIONS = {
+  async addAccess(
+    access: AccessById,
+    id: string,
+  ): Promise<Result<void, string>> {
+    const result = await tryCatch(
+      redis.hset(`untis-to-calendar:access:ics:${id}`, access),
+    );
+    if (result.isErr()) return err(result.error.message);
+    return ok();
   },
 };
