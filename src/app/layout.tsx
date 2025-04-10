@@ -2,6 +2,7 @@ import "./globals.css";
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackServerApp } from "../stack";
 import type { Metadata } from "next";
+import ThemeProvider from "../../components/theme-provider";
 
 export const metadata: Metadata = {
   title: "Untis to Calendar",
@@ -14,8 +15,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body><StackProvider app={stackServerApp}><StackTheme>{children}</StackTheme></StackProvider></body>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <StackProvider app={stackServerApp}>
+            <StackTheme>{children}</StackTheme>
+          </StackProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
