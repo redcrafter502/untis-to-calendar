@@ -18,7 +18,7 @@ import { env } from "@/env";
 export default async function DashboardPage() {
   const user = await stackServerApp.getUser({ or: "redirect" });
   return (
-    <main className="mt-4 flex w-full justify-center">
+    <main className="mt-4 mb-4 flex w-full justify-center">
       <div className="flex flex-col gap-8">
         <div className="flex w-full flex-col gap-4">
           <h1 className="text-4xl">Create a new Access</h1>
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
             <Suspense
               key={access}
               fallback={
-                <div>
+                <div className="flex w-full justify-center">
                   <Loader2 className="animate-spin" />
                 </div>
               }
@@ -115,7 +115,6 @@ export default async function DashboardPage() {
 }
 
 async function AccessCard({ accessId }: { accessId: string }) {
-  await new Promise((r) => setTimeout(r, 1000 * Math.random())); // sleep 1s
   const access = await QUERIES.getAccessById(accessId);
   if (access.isErr())
     return <div className="text-red-500">Error: {access.error}</div>;
