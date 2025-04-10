@@ -88,7 +88,9 @@ function CreateForm({
       domain: defaultDomain,
       school: defaultSchool,
       authType,
+      classId: "",
       username: defaultUsername ?? "",
+      password: "",
       secret: defaultSecret ?? "",
     },
   });
