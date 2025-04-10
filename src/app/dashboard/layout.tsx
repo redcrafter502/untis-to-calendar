@@ -1,4 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { UserButton } from "@stackframe/stack";
+import Link from "next/link";
 import { Suspense } from "react";
 
 export default function DashboardLayout({
@@ -7,12 +9,25 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <Suspense fallback={<div>Loading...</div>}>
-        <UserButton />
-      </Suspense>
-      {children}
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between border-b-2 border-gray-500 p-4">
+        <div>
+          <Button variant="ghost">
+            <Link href="/" className="text-xl">
+              Untis to Calendar
+            </Link>
+          </Button>
+          <Button variant="ghost">
+            <Link href="/dashboard" className="text-lg">
+              Dashboard
+            </Link>
+          </Button>
+        </div>
+        <Suspense fallback={<div>Loading...</div>}>
+          <UserButton />
+        </Suspense>
+      </div>
+      <main>{children}</main>
     </div>
   );
 }
