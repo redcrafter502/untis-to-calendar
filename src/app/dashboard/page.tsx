@@ -10,6 +10,10 @@ import { stackServerApp } from "@/stack";
 import { ArrowRight, Loader2, ScanQrCode } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { QUERIES } from "@/db/queries";
+import { Input } from "@/components/ui/input";
+import { UrlCopyButton } from "./client";
+import { env } from "@/env";
 
 export default async function DashboardPage() {
   const user = await stackServerApp.getUser({ or: "redirect" });
@@ -112,12 +116,28 @@ export default async function DashboardPage() {
 
 async function AccessCard({ accessId }: { accessId: string }) {
   await new Promise((r) => setTimeout(r, 1000 * Math.random())); // sleep 1s
+  const access = await QUERIES.getAccessById(accessId);
+  if (access.isErr())
+    return <div className="text-red-500">Error: {access.error}</div>;
+
+  const url = new URL(`/api/ics/${accessId}`, env.API_URL).href;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{accessId}</CardTitle>
+        <CardTitle>{access.value.name}</CardTitle>
+        <CardDescription>
+          {access.value.school} ({access.value.domain} - {access.value.timezone}
+          )
+        </CardDescription>
       </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <p>Auth Type: {access.value.authType}</p>
+        <div className="flex w-full gap-4">
+          <Input disabled value={url} />
+          <UrlCopyButton url={url} />
+        </div>
+      </CardContent>
     </Card>
   );
 }
