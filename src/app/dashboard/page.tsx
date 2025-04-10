@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { stackServerApp } from "@/stack";
 import { ArrowRight, ScanQrCode } from "lucide-react";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   await stackServerApp.getUser({ or: "redirect" });
@@ -28,8 +29,10 @@ export default async function DashboardPage() {
                   secure way to connect your untis account to "Untis to
                   calendar".
                 </p>
-                <Button className="w-full">
-                  Get Started <ArrowRight />
+                <Button className="w-full" asChild>
+                  <Link href="/dashboard/new?state=qrcode">
+                    Get Started <ArrowRight />
+                  </Link>
                 </Button>
               </div>
               <ScanQrCode size={128} className="min-w-32" />
@@ -45,8 +48,10 @@ export default async function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="secondary">
-                Get Started <ArrowRight />
+              <Button variant="secondary" asChild>
+                <Link href="/dashboard/new?state=public">
+                  Get Started <ArrowRight />
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -58,8 +63,10 @@ export default async function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="secondary">
-                Get Started <ArrowRight />
+              <Button variant="secondary" asChild>
+                <Link href="/dashboard/new?state=password">
+                  Get Started <ArrowRight />
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -71,8 +78,10 @@ export default async function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="secondary">
-                Get Started <ArrowRight />
+              <Button variant="secondary" asChild>
+                <Link href="/dashboard/new?state=secret">
+                  Get Started <ArrowRight />
+                </Link>
               </Button>
             </CardContent>
           </Card>
