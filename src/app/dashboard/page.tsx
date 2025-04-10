@@ -92,7 +92,9 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-          <p>QR Code and Public are not yet implemented.</p>
+          <p className="text-red-500">
+            QR Code and Public are not yet implemented.
+          </p>
         </div>
         <div className="flex w-full flex-col gap-4">
           <h1 className="text-4xl">Your Accesses</h1>
