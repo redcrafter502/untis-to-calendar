@@ -7,5 +7,6 @@ export const stackServerApp = new StackServerApp({
   urls: {
     afterSignIn: "/dashboard",
     afterSignUp: "/dashboard",
+    accountSettings: "/dashboard/account-settings",
   },
 });
