@@ -10,24 +10,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { type } from "arktype";
 import { useForm } from "react-hook-form";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { Input } from "@/components/ui/input";
-
-const formSchema = type({
-  name: "string > 0",
-  timezone: "string > 0",
-  domain: "string > 0",
-  school: "string > 0",
-  authType: "'public' | 'password' | 'secret'",
-  "classId?": "string > 0",
-  "username?": "string > 0",
-  "password?": "string > 0",
-  "secret?": "string > 0",
-});
+import { formSchema } from "./validators";
+import { createAccess } from "./server";
+import { toast } from "sonner";
 
 export default function NewAccessPage() {
   const searchParams = useSearchParams();
@@ -94,9 +84,12 @@ function CreateForm({
       secret: defaultSecret ?? "",
     },
   });
+  const router = useRouter();
 
-  function onSubmit(values: typeof formSchema.infer) {
-    console.log(values);
+  async function onSubmit(values: typeof formSchema.infer) {
+    const result = await createAccess(values);
+    if (result.error) return toast.error(result.error);
+    router.push("/dashboard");
   }
 
   return (

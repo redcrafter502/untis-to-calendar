@@ -3,6 +3,7 @@ import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackServerApp } from "../stack";
 import type { Metadata } from "next";
 import ThemeProvider from "../../components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Untis to Calendar",
@@ -24,7 +25,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <StackProvider app={stackServerApp}>
-            <StackTheme>{children}</StackTheme>
+            <StackTheme>
+              {children}
+              <Toaster />
+            </StackTheme>
           </StackProvider>
         </ThemeProvider>
       </body>
