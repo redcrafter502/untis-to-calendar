@@ -142,7 +142,7 @@ function FeaturesSection() {
   return (
     <section
       id="features"
-      className="w-full bg-slate-50 py-12 md:py-24 lg:py-32 dark:bg-slate-900"
+      className="flex w-full justify-center bg-slate-50 py-12 md:py-24 lg:py-32 dark:bg-slate-900"
     >
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -151,7 +151,8 @@ function FeaturesSection() {
               Key Features
             </h2>
             <p className="text-muted-foreground max-w-[900px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              Everything you need to keep your schedule organized and accessible
+              Everything you need to integrate your timetable into your
+              organizational system
             </p>
           </div>
         </div>
@@ -168,8 +169,7 @@ function FeaturesSection() {
             <Calendar className="text-primary h-12 w-12" />
             <h3 className="text-xl font-bold">Multi-Platform Support</h3>
             <p className="text-muted-foreground text-center">
-              Works with Google Calendar, Apple Calendar, Microsoft Outlook, and
-              more
+              Works with all Calendar platforms using the ICS protocol
             </p>
           </div>
           <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
@@ -177,7 +177,8 @@ function FeaturesSection() {
             <h3 className="text-xl font-bold">Real-Time Updates</h3>
             <p className="text-muted-foreground text-center">
               Changes in your Untis timetable are reflected in your calendar
-              within minutes
+              within minutes (dependent on the configuration of your calendar
+              app)
             </p>
           </div>
         </div>
