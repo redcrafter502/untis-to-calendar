@@ -8,6 +8,9 @@ import { Toaster } from "@/components/ui/sonner";
 export const metadata: Metadata = {
   title: "Untis to Calendar",
   description: "Sync your untis timetable with your calendar",
+  icons: {
+    icon: "/logo.webp",
+  },
 };
 
 export default function RootLayout({
