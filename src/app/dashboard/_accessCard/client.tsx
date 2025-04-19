@@ -34,3 +34,24 @@ export function UrlDisplayInput({ path }: { path: string }) {
   const url = useUrl(path);
   return <Input disabled value={url} />;
 }
+
+export function DeleteButton() {
+  const [inDeleting, setInDeleting] = useState(false);
+
+  if (!inDeleting)
+    return (
+      <Button onClick={() => setInDeleting(true)} variant="destructive">
+        Delete
+      </Button>
+    );
+  return (
+    <div className="flex gap-2">
+      <Button onClick={() => setInDeleting(false)} variant="ghost">
+        Cancel
+      </Button>
+      <Button type="submit" variant="destructive">
+        Confirm
+      </Button>
+    </div>
+  );
+}
