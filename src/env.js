@@ -3,7 +3,6 @@ import { type } from "arktype";
 
 export const env = createEnv({
   server: {
-    API_URL: type("string"),
     NEXT_PUBLIC_STACK_PROJECT_ID: type("string"),
     NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY: type("string"),
     STACK_SECRET_SERVER_KEY: type("string"),
@@ -15,7 +14,6 @@ export const env = createEnv({
   },
   client: {},
   runtimeEnv: {
-    API_URL: process.env.API_URL,
     NEXT_PUBLIC_STACK_PROJECT_ID: process.env.NEXT_PUBLIC_STACK_PROJECT_ID,
     NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY:
       process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY,

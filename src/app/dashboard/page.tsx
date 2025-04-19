@@ -11,9 +11,7 @@ import { ArrowRight, Loader2, ScanQrCode } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { QUERIES } from "@/db/queries";
-import { Input } from "@/components/ui/input";
-import { UrlCopyButton } from "./client";
-import { env } from "@/env";
+import { UrlDisplayInput, UrlCopyButton } from "./client";
 
 export default async function DashboardPage() {
   const user = await stackServerApp.getUser({ or: "redirect" });
@@ -121,7 +119,7 @@ async function AccessCard({ accessId }: { accessId: string }) {
   if (access.isErr())
     return <div className="text-red-500">Error: {access.error}</div>;
 
-  const url = new URL(`/api/ics/${accessId}`, env.API_URL).href;
+  const path = `/api/ics/${accessId}`;
 
   return (
     <Card>
@@ -135,8 +133,8 @@ async function AccessCard({ accessId }: { accessId: string }) {
       <CardContent className="flex flex-col gap-4">
         <p>Auth Type: {access.value.authType}</p>
         <div className="flex w-full gap-4">
-          <Input disabled value={url} />
-          <UrlCopyButton url={url} />
+          <UrlDisplayInput path={path} />
+          <UrlCopyButton path={path} />
         </div>
       </CardContent>
     </Card>
