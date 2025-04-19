@@ -1,7 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { stackServerApp } from "@/stack";
-import { redirect } from "next/navigation";
-
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -20,23 +17,7 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
-
-/*export default function Page() {
-  return (
-    <div className="w-full p-20 text-center">
-      <h1>Hello World</h1>
-      <form
-        action={async () => {
-          "use server";
-          await stackServerApp.getUser({ or: "redirect" });
-          redirect("/dashboard");
-        }}
-      >
-        <Button type="submit">Get Started</Button>
-      </form>
-    </div>
-  );
-}*/
+import { getStarted } from "./getStarted";
 
 export default function Page() {
   return (
@@ -51,7 +32,7 @@ export default function Page() {
 function PageHeader() {
   return (
     <header className="bg-background sticky top-0 z-40 flex w-full justify-center border-b">
-      <div className="container mx-2 flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
+      <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
         <div className="flex gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
             <Calendar className="h-6 w-6" />
@@ -115,7 +96,7 @@ function PageMain() {
 
 function TopSection() {
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+    <section className="flex w-full justify-center py-12 md:py-24 lg:py-32 xl:py-48">
       <div className="container px-4 md:px-6">
         <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
           <div className="flex flex-col justify-center space-y-4">
@@ -125,16 +106,16 @@ function TopSection() {
               </h1>
               <p className="text-muted-foreground max-w-[600px] md:text-xl">
                 Never miss a class again. Automatically sync your Untis school
-                timetable with Google Calendar, Apple Calendar, Outlook, and
-                more.
+                timetable to your calendar app of choice, eg. Google Calendar,
+                Apple Calendar, Thunderbird, Outlook, and more.
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <Button size="lg" asChild>
-                <Link href="/get-started">
+              <form action={getStarted}>
+                <Button type="submit" size="lg">
                   Get Started <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+                </Button>
+              </form>
               <Button size="lg" variant="outline" asChild>
                 <Link href="#how-it-works">Learn More</Link>
               </Button>
@@ -143,10 +124,10 @@ function TopSection() {
           <div className="flex items-center justify-center">
             <div className="relative h-[350px] w-[350px] sm:h-[400px] sm:w-[400px] lg:h-[450px] lg:w-[450px]">
               <Image
-                src="/placeholder.svg?height=450&width=450"
+                src="/logo.webp"
                 alt="Untis to Calendar App"
                 fill
-                className="rounded-lg object-cover"
+                className="object-cover"
                 priority
               />
             </div>
