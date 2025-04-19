@@ -236,11 +236,11 @@ function HowItWorksSection() {
           </div>
         </div>
         <div className="flex justify-center">
-          <Button size="lg" asChild>
-            <Link href="/get-started">
+          <form action={getStarted}>
+            <Button type="submit" size="lg">
               Get Started Now <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+            </Button>
+          </form>
         </div>
       </div>
     </section>
@@ -291,11 +291,11 @@ function BottomSection() {
             </p>
           </div>
           <div className="flex flex-col gap-2 min-[400px]:flex-row">
-            <Button size="lg" asChild>
-              <Link href="/get-started">
+            <form action={getStarted}>
+              <Button type="submit" size="lg">
                 Get Started for Free <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+              </Button>
+            </form>
             <Button size="lg" variant="outline" asChild>
               <a
                 href="https://github.com/redcrafter502/untis-to-calendar/issues/new"
