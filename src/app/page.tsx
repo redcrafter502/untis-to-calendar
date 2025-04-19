@@ -50,7 +50,7 @@ export default function Page() {
 
 function PageHeader() {
   return (
-    <header className="bg-background sticky top-0 z-40 w-full border-b">
+    <header className="bg-background sticky top-0 z-40 flex w-full justify-center border-b">
       <div className="container mx-2 flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
         <div className="flex gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
@@ -60,25 +60,28 @@ function PageHeader() {
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               <NavigationMenuItem>
-                <Link href="#features" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Features
-                  </NavigationMenuLink>
-                </Link>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle()}
+                  asChild
+                >
+                  <Link href="#features">Features</Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="#how-it-works" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    How It Works
-                  </NavigationMenuLink>
-                </Link>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle()}
+                  asChild
+                >
+                  <Link href="#how-it-works">How It Works</Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="#platforms" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Supported Platforms
-                  </NavigationMenuLink>
-                </Link>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle()}
+                  asChild
+                >
+                  <Link href="#platforms">Supported Platforms</Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
@@ -86,10 +89,10 @@ function PageHeader() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
             <Button variant="outline" asChild>
-              <Link href="/login">Log in</Link>
+              <Link href="/handler/sign-in">Log in</Link>
             </Button>
             <Button asChild>
-              <Link href="/signup">Sign up</Link>
+              <Link href="/handler/sign-up">Sign up</Link>
             </Button>
           </nav>
         </div>
