@@ -170,7 +170,7 @@ function FeaturesSection() {
             <Calendar className="text-primary h-12 w-12" />
             <h3 className="text-xl font-bold">Multi-Platform Support</h3>
             <p className="text-muted-foreground text-center">
-              Works with all Calendar platforms using the ICS protocol
+              Works with all Calendar platforms using the iCal protocol
             </p>
           </div>
           <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
