@@ -250,7 +250,7 @@ function PlatformSections() {
   return (
     <section
       id="platforms"
-      className="w-full bg-slate-50 py-12 md:py-24 lg:py-32 dark:bg-slate-900"
+      className="flex w-full justify-center bg-slate-50 py-12 md:py-24 lg:py-32 dark:bg-slate-900"
     >
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -259,67 +259,18 @@ function PlatformSections() {
               Supported Platforms
             </h2>
             <p className="text-muted-foreground max-w-[900px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              Works seamlessly with your favorite calendar applications and
-              devices
+              Works seamlessly with your favorite calendar applications on your
+              favorite devices
             </p>
           </div>
         </div>
-        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-6 py-12 md:grid-cols-4">
-          <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-            <Image
-              src="/placeholder.svg?height=64&width=64"
-              alt="Google Calendar"
-              width={64}
-              height={64}
-              className="h-16 w-16"
-            />
-            <h3 className="text-lg font-medium">Google Calendar</h3>
-          </div>
-          <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-            <Image
-              src="/placeholder.svg?height=64&width=64"
-              alt="Apple Calendar"
-              width={64}
-              height={64}
-              className="h-16 w-16"
-            />
-            <h3 className="text-lg font-medium">Apple Calendar</h3>
-          </div>
-          <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-            <Image
-              src="/placeholder.svg?height=64&width=64"
-              alt="Microsoft Outlook"
-              width={64}
-              height={64}
-              className="h-16 w-16"
-            />
-            <h3 className="text-lg font-medium">Microsoft Outlook</h3>
-          </div>
-          <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-            <Image
-              src="/placeholder.svg?height=64&width=64"
-              alt="Other Calendars"
-              width={64}
-              height={64}
-              className="h-16 w-16"
-            />
-            <h3 className="text-lg font-medium">Other Calendars</h3>
-          </div>
-        </div>
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-6 md:grid-cols-3">
-          <div className="flex items-center justify-center space-x-2 rounded-lg border p-4">
-            <Laptop className="text-primary h-8 w-8" />
-            <span className="text-lg font-medium">Web Browser</span>
-          </div>
-          <div className="flex items-center justify-center space-x-2 rounded-lg border p-4">
-            <Smartphone className="text-primary h-8 w-8" />
-            <span className="text-lg font-medium">iOS App</span>
-          </div>
-          <div className="flex items-center justify-center space-x-2 rounded-lg border p-4">
-            <Smartphone className="text-primary h-8 w-8" />
-            <span className="text-lg font-medium">Android App</span>
-          </div>
-        </div>
+        <ul className="mx-auto grid max-w-5xl grid-cols-2 gap-6 py-12 md:grid-cols-5">
+          <li>Google Calendar</li>
+          <li>Apple Calendar</li>
+          <li>Thunderbird</li>
+          <li>Outlook</li>
+          <li>Other Calendars</li>
+        </ul>
       </div>
     </section>
   );
