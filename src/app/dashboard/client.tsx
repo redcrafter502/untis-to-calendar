@@ -4,11 +4,20 @@ import { Clipboard } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+
+function useUrl(path: string) {
+  const [url, setUrl] = useState<URL | null>(null);
+  useEffect(() => {
+    setUrl(new URL(path, window.location.origin));
+  }, [path]);
+  return url?.href ?? "";
+}
 
 export function UrlCopyButton({ path }: { path: string }) {
-  const url = new URL(path, window.location.origin);
+  const url = useUrl(path);
   async function copyUrlToClipboard() {
-    await navigator.clipboard.writeText(url.href).catch((error) => {
+    await navigator.clipboard.writeText(url).catch((error) => {
       toast.error("Failed to copy URL to clipboard: " + error);
     });
     toast.success("URL copied to clipboard");
@@ -22,6 +31,6 @@ export function UrlCopyButton({ path }: { path: string }) {
 }
 
 export function UrlDisplayInput({ path }: { path: string }) {
-  const url = new URL(path, window.location.origin);
-  return <Input disabled value={url.href} />;
+  const url = useUrl(path);
+  return <Input disabled value={url} />;
 }
