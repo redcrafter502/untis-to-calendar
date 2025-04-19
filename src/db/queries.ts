@@ -88,4 +88,11 @@ export const MUTATIONS = {
     if (result.isErr()) return err(result.error.message);
     return ok();
   },
+  async deleteAccess(id: string): Promise<Result<void, string>> {
+    const result = await tryCatch(
+      redis.del(`untis-to-calendar:access:ics:${id}`),
+    );
+    if (result.isErr()) return err(result.error.message);
+    return ok();
+  },
 };

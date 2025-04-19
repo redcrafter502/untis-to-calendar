@@ -6,9 +6,9 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { QUERIES } from "@/db/queries";
+import { QUERIES, MUTATIONS } from "@/db/queries";
 import { UrlDisplayInput, UrlCopyButton, DeleteButton } from "./client";
+import { revalidatePath } from "next/cache";
 
 export async function AccessCard({ accessId }: { accessId: string }) {
   const access = await QUERIES.getAccessById(accessId);
@@ -38,6 +38,10 @@ export async function AccessCard({ accessId }: { accessId: string }) {
           action={async () => {
             "use server";
             console.log("Deleting access", accessId);
+            const result = await MUTATIONS.deleteAccess(accessId);
+            if (result.isErr())
+              console.error("Error deleting access", result.error);
+            revalidatePath("/dashboard");
           }}
         >
           <DeleteButton />
