@@ -287,7 +287,7 @@ function BottomSection() {
               Ready to Simplify Your Schedule?
             </h2>
             <p className="text-muted-foreground max-w-[600px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              Synchronize your timetable to your calandar app now
+              Synchronize your timetable to your calendar app now
             </p>
           </div>
           <div className="flex flex-col gap-2 min-[400px]:flex-row">
