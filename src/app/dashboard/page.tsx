@@ -14,6 +14,8 @@ import { AccessCard } from "./_accessCard/accessCard";
 
 export default async function DashboardPage() {
   const user = await stackServerApp.getUser({ or: "redirect" });
+  const accesses = (user.serverMetadata?.accesses ?? []) as string[];
+
   return (
     <main className="mt-4 mb-4 flex w-full justify-center">
       <div className="flex flex-col gap-8">
@@ -94,8 +96,9 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex w-full flex-col gap-4">
-          <h1 className="text-4xl">Your Accesses</h1>
-          {((user.serverMetadata?.accesses ?? []) as string[]).map((access) => (
+          {accesses.length === 0 && <h1 className="text-4xl">No Accesses</h1>}
+          {accesses.length > 0 && <h1 className="text-4xl">Your Accesses</h1>}
+          {accesses.map((access) => (
             <Suspense
               key={access}
               fallback={
