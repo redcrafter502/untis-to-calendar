@@ -8,6 +8,7 @@ import {
   Laptop,
   Smartphone,
   RefreshCw,
+  Github,
 } from "lucide-react";
 
 import {
@@ -312,24 +313,34 @@ function BottomSection() {
 
 function PageFooter() {
   return (
-    <footer className="w-full border-t bg-slate-50 py-6 dark:bg-slate-900">
+    <footer className="flex w-full justify-center border-t bg-slate-50 py-6 dark:bg-slate-900">
       <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
         <div className="flex items-center gap-2">
           <Calendar className="h-5 w-5" />
           <p className="text-muted-foreground text-sm">
-            © 2023 Untis to Calendar. All rights reserved.
+            © 2025 redcrafter502. All rights reserved.
           </p>
         </div>
-        <nav className="text-muted-foreground flex gap-4 text-sm">
-          <Link href="/terms" className="hover:underline">
+        <nav className="text-muted-foreground flex items-center gap-4 text-sm">
+          {/*<Link href="/terms" className="hover:underline">
             Terms
           </Link>
           <Link href="/privacy" className="hover:underline">
             Privacy
-          </Link>
-          <Link href="/contact" className="hover:underline">
-            Contact
-          </Link>
+            </Link>*/}
+          <a
+            href="https://github.com/redcrafter502/untis-to-calendar/issues/new"
+            target="_blank"
+            className="hover:underline"
+          >
+            Report an issue
+          </a>
+          <a
+            href="https://github.com/redcrafter502/untis-to-calendar"
+            target="_blank"
+          >
+            <Github />
+          </a>
         </nav>
       </div>
     </footer>
