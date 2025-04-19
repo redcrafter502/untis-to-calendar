@@ -189,7 +189,10 @@ function FeaturesSection() {
 
 function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32">
+    <section
+      id="how-it-works"
+      className="flex w-full justify-center py-12 md:py-24 lg:py-32"
+    >
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
@@ -215,9 +218,10 @@ function HowItWorksSection() {
             <div className="bg-primary text-primary-foreground flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold">
               2
             </div>
-            <h3 className="text-xl font-bold">Choose Your Calendar</h3>
+            <h3 className="text-xl font-bold">Generate link</h3>
             <p className="text-muted-foreground text-center">
-              Select which calendar application you want to sync with
+              Generate a link to be inserted as a calendar into your calendar
+              application
             </p>
           </div>
           <div className="flex flex-col items-center space-y-4">
