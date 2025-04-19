@@ -7,7 +7,7 @@ export async function removeAccess(id: string) {
   if (userResult.isErr())
     return console.error("Error removing user", userResult.error);
 
-  const dbResult = await removeIdFromUser(id);
+  const dbResult = await MUTATIONS.deleteAccess(id);
   if (dbResult.isErr()) console.error("Error deleting access", dbResult.error);
 }
 
