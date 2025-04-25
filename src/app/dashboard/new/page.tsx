@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { formSchema } from "./validators";
 import { createAccess } from "./server";
 import { toast } from "sonner";
+import { QrReader } from "react-qr-reader";
 
 export default function NewAccessPage() {
   const searchParams = useSearchParams();
@@ -25,7 +26,15 @@ export default function NewAccessPage() {
   const [pageState, setPageState] = useState(searchParams.get("state"));
 
   if (pageState === "qrcode") {
-    return <main>QR Code</main>;
+    return (
+      <main>
+        QR Code
+        <QrReader
+          constraints={{ facingMode: "environment" }}
+          onResult={(result, error) => console.log(result, error)}
+        />
+      </main>
+    );
   }
   if (
     pageState === "public" ||
