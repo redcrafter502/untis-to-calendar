@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { formSchema } from "./validators";
 import { createAccess } from "./server";
 import { toast } from "sonner";
-import { QrReader } from "react-qr-reader";
+import { QrReader } from "./qrreadet";
 
 export default function NewAccessPage() {
   const searchParams = useSearchParams();
@@ -29,10 +29,18 @@ export default function NewAccessPage() {
     return (
       <main>
         QR Code
-        <QrReader
+        {/* <QrReader
           constraints={{ facingMode: "environment" }}
-          onResult={(result, error) => console.log(result, error)}
-        />
+          onResult={(result, error) => {
+            if (result) {
+              console.log("RESULT", result);
+            }
+            if (error) {
+              console.log("ERROR", error);
+            }
+          }}
+        /> */}
+        <QrReader />
       </main>
     );
   }
