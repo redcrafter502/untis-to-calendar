@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { formSchema } from "./validators";
 import { createAccess } from "./server";
 import { toast } from "sonner";
-import { QrReader } from "./qrreadet";
+import { QrReader } from "./qr-reader";
 
 export default function NewAccessPage() {
   const searchParams = useSearchParams();
