@@ -35,9 +35,9 @@ export default async function DashboardPage() {
                     calendar".
                   </p>
                   <Button className="w-full" asChild>
-                    <Link href="/dashboard/new?state=qrcode">
+                    <a href="/dashboard/new?state=qrcode">
                       Get Started <ArrowRight />
-                    </Link>
+                    </a>
                   </Button>
                 </div>
                 <ScanQrCode size={128} className="min-w-32" />
@@ -91,9 +91,7 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-          <p className="text-red-500">
-            QR Code and Public are not yet implemented.
-          </p>
+          <p className="text-red-500">Public is not yet implemented.</p>
         </div>
         <div className="flex w-full flex-col gap-4">
           {accesses.length === 0 && <h1 className="text-4xl">No Accesses</h1>}

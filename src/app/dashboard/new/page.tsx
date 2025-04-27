@@ -20,15 +20,45 @@ import { createAccess } from "./server";
 import { toast } from "sonner";
 import { QrReader } from "./qr-reader";
 
+const defaultTimezone = "Europe/Berlin";
+
 export default function NewAccessPage() {
   const searchParams = useSearchParams();
 
   const [pageState, setPageState] = useState(searchParams.get("state"));
+  const [qrValues, setQrValues] = useState<{
+    school: string;
+    url: string;
+    user: string;
+    key: string;
+  } | null>(null);
 
   if (pageState === "qrcode") {
     return (
       <main className="mt-4 mb-4 flex justify-center">
-        <QrReader />
+        <QrReader
+          onResult={(result) => {
+            const untisUrl = new URL(result);
+            const url = untisUrl.searchParams.get("url");
+            const user = untisUrl.searchParams.get("user");
+            const key = untisUrl.searchParams.get("key");
+            const school = untisUrl.searchParams.get("school");
+            console.log(url, user, key, school);
+            if (
+              !url ||
+              !user ||
+              !key ||
+              !school ||
+              !result.startsWith("untis://setschool")
+            ) {
+              toast.error("Invalid QR Code");
+              return;
+            }
+            setQrValues({ url, user, key, school });
+
+            setPageState("secret");
+          }}
+        />
       </main>
     );
   }
@@ -40,12 +70,23 @@ export default function NewAccessPage() {
     return (
       <main className="mt-4 mb-4 flex w-full flex-col items-center gap-4">
         <h1 className="text-4xl">Creating a new {pageState} Access</h1>
-        <CreateForm
-          defaultTimezone="Europe/Berlin"
-          defaultDomain="neilo.webuntis.com"
-          defaultSchool=""
-          authType={pageState}
-        />
+        {pageState === "secret" && !!qrValues ? (
+          <CreateForm
+            defaultTimezone={defaultTimezone}
+            defaultDomain={qrValues.url}
+            defaultSchool={qrValues.school}
+            authType={pageState}
+            defaultUsername={qrValues.user}
+            defaultSecret={qrValues.key}
+          />
+        ) : (
+          <CreateForm
+            defaultTimezone={defaultTimezone}
+            defaultDomain="neilo.webuntis.com"
+            defaultSchool=""
+            authType={pageState}
+          />
+        )}
       </main>
     );
   }
