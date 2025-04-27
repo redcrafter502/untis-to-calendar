@@ -29,17 +29,6 @@ export default function NewAccessPage() {
     return (
       <main>
         QR Code
-        {/* <QrReader
-          constraints={{ facingMode: "environment" }}
-          onResult={(result, error) => {
-            if (result) {
-              console.log("RESULT", result);
-            }
-            if (error) {
-              console.log("ERROR", error);
-            }
-          }}
-        /> */}
         <QrReader />
       </main>
     );
