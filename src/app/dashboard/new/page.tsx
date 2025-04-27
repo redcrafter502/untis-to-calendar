@@ -304,18 +304,30 @@ function CreateForm({
             control={form.control}
             name="classId"
             render={({ field }) => (
-              <Select {...field}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a class" />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes.map((class_) => (
-                    <SelectItem key={class_.id} value={class_.id.toString()}>
-                      {class_.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormItem>
+                <FormLabel>Class</FormLabel>
+                <FormControl>
+                  <Select {...field}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a class" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {classes.map((class_) => (
+                        <SelectItem
+                          key={class_.id}
+                          value={class_.id.toString()}
+                        >
+                          {class_.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormDescription>
+                  The class for which you want to view the timetable.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
             )}
           />
         )}
