@@ -9,16 +9,22 @@ import {
 import QrScanner from "qr-scanner";
 import { useEffect, useRef, useState } from "react";
 
-export function QrReader() {
+export function QrReader({ onResult }: { onResult: (result: string) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const qrBoxRef = useRef<HTMLDivElement>(null);
   const scanner = useRef<QrScanner | null>(null);
-  const [qrOn, setQrOn] = useState(false);
+  const [qrOn, setQrOn] = useState(true);
   const [result, setResult] = useState("");
 
   function onScanSuccess(qrCode: QrScanner.ScanResult) {
     setResult(qrCode.data);
   }
+
+  useEffect(() => {
+    if (!result) return;
+    const timeout = setTimeout(() => onResult(result), 500);
+    return () => clearTimeout(timeout);
+  }, [result]);
 
   function onScanFail(err: string | Error) {
     console.log("SCAN FAILED: ", err);
@@ -53,6 +59,13 @@ export function QrReader() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!qrOn)
+      alert(
+        "Camera is blocked or not accessible. Please allow camera in your browser permissions and Reload.",
+      );
+  }, [qrOn]);
+
   return (
     <Card>
       <CardHeader>
@@ -78,7 +91,9 @@ export function QrReader() {
           </div>
         </div>
       </CardContent>
-      <CardFooter>{result && <p>Scanned Result: {result}</p>}</CardFooter>
+      <CardFooter className="w-full max-w-[430px]">
+        {result && <p className="overflow-hidden">{result}</p>}
+      </CardFooter>
     </Card>
   );
 }
