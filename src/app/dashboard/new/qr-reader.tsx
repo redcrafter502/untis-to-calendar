@@ -13,9 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Camera } from "lucide-react";
 import QrScanner from "qr-scanner";
-import { Suspense, use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function QrReader({ onResult }: { onResult: (result: string) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
