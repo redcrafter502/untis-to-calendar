@@ -91,7 +91,6 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-          <p className="text-red-500">Public is not yet implemented.</p>
         </div>
         <div className="flex w-full flex-col gap-4">
           {accesses.length === 0 && <h1 className="text-4xl">No Accesses</h1>}

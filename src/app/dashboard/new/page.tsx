@@ -16,9 +16,16 @@ import { useForm } from "react-hook-form";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { Input } from "@/components/ui/input";
 import { formSchema } from "./validators";
-import { createAccess } from "./server";
+import { createAccess, getClasses } from "./server";
 import { toast } from "sonner";
 import { QrReader } from "./qr-reader";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@radix-ui/react-select";
 
 const defaultTimezone = "Europe/Berlin";
 
@@ -116,6 +123,9 @@ function CreateForm({
   defaultUsername?: string;
   defaultSecret?: string;
 }) {
+  const [classes, setClasses] = useState<
+    { id: number; name: string }[] | undefined
+  >(undefined);
   const form = useForm<typeof formSchema.infer>({
     resolver: arktypeResolver(formSchema),
     defaultValues: {
@@ -140,7 +150,10 @@ function CreateForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col space-y-4"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -270,6 +283,41 @@ function CreateForm({
                 <FormDescription>Your untis secret.</FormDescription>
                 <FormMessage />
               </FormItem>
+            )}
+          />
+        )}
+        {authType === "public" && !classes && (
+          <Button
+            onClick={async () => {
+              console.log("Querying classes...");
+              const classes = await getClasses(
+                form.getValues().school,
+                form.getValues().domain,
+              );
+              console.log("Classes:", classes);
+              setClasses(classes);
+            }}
+          >
+            Query Classes
+          </Button>
+        )}
+        {authType === "public" && !!classes && (
+          <FormField
+            control={form.control}
+            name="classId"
+            render={({ field }) => (
+              <Select {...field}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a class" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes.map((class_) => (
+                    <SelectItem key={class_.id} value={class_.id.toString()}>
+                      {class_.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           />
         )}
