@@ -6,8 +6,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Camera } from "lucide-react";
 import QrScanner from "qr-scanner";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, use, useEffect, useRef, useState } from "react";
 
 export function QrReader({ onResult }: { onResult: (result: string) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -15,6 +23,12 @@ export function QrReader({ onResult }: { onResult: (result: string) => void }) {
   const scanner = useRef<QrScanner | null>(null);
   const [qrOn, setQrOn] = useState(true);
   const [result, setResult] = useState("");
+  const [preferredCamera, setPreferredCamera] = useState<string | null>(null);
+  const [cameras, setCameras] = useState<QrScanner.Camera[]>([]);
+
+  useEffect(() => {
+    QrScanner.listCameras(true).then((cameras) => setCameras(cameras));
+  }, []);
 
   function onScanSuccess(qrCode: QrScanner.ScanResult) {
     setResult(qrCode.data);
@@ -37,7 +51,7 @@ export function QrReader({ onResult }: { onResult: (result: string) => void }) {
         onScanSuccess as unknown as (result: string) => void,
         {
           onDecodeError: onScanFail,
-          preferredCamera: "envirement",
+          preferredCamera: preferredCamera ?? "envirement",
           highlightScanRegion: true,
           highlightCodeOutline: true,
           overlay: qrBoxRef.current,
@@ -57,7 +71,7 @@ export function QrReader({ onResult }: { onResult: (result: string) => void }) {
         scanner.current?.stop();
       }
     };
-  }, []);
+  }, [preferredCamera]);
 
   useEffect(() => {
     if (!qrOn)
@@ -92,7 +106,23 @@ export function QrReader({ onResult }: { onResult: (result: string) => void }) {
         </div>
       </CardContent>
       <CardFooter className="w-full max-w-[430px]">
-        {result && <p className="overflow-hidden">{result}</p>}
+        <Select
+          value={preferredCamera ?? "null"}
+          onValueChange={setPreferredCamera}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="null">Default</SelectItem>
+            {cameras.map((camera) => (
+              <SelectItem key={camera.id} value={camera.id}>
+                {camera.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {result && <div className="overflow-hidden">{result}</div>}
       </CardFooter>
     </Card>
   );
