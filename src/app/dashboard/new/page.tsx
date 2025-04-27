@@ -25,7 +25,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@radix-ui/react-select";
+} from "@/components/ui/select";
 
 const defaultTimezone = "Europe/Berlin";
 
@@ -289,12 +289,10 @@ function CreateForm({
         {authType === "public" && !classes && (
           <Button
             onClick={async () => {
-              console.log("Querying classes...");
               const classes = await getClasses(
                 form.getValues().school,
                 form.getValues().domain,
               );
-              console.log("Classes:", classes);
               setClasses(classes);
             }}
           >
