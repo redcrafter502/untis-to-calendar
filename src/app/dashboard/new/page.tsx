@@ -27,8 +27,7 @@ export default function NewAccessPage() {
 
   if (pageState === "qrcode") {
     return (
-      <main>
-        QR Code
+      <main className="mt-4 mb-4 flex justify-center">
         <QrReader />
       </main>
     );
@@ -39,7 +38,7 @@ export default function NewAccessPage() {
     pageState === "secret"
   ) {
     return (
-      <main className="mt-4 flex w-full flex-col items-center gap-4">
+      <main className="mt-4 mb-4 flex w-full flex-col items-center gap-4">
         <h1 className="text-4xl">Creating a new {pageState} Access</h1>
         <CreateForm
           defaultTimezone="Europe/Berlin"

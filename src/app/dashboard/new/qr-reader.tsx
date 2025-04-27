@@ -54,33 +54,31 @@ export function QrReader() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center">
-      <Card>
-        <CardHeader>
-          <CardTitle>Easily add your Untis Login</CardTitle>
-          <CardDescription>
-            Scan your QR Code from your Untis Account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full max-w-[430px]">
-            <video ref={videoRef}></video>
-            <div className="left-0 w-full" ref={qrBoxRef}>
-              <img
-                className="absolute top-1/2 left-1/2 fill-none"
-                style={{
-                  transform: "translate(-50%, -50%)",
-                }}
-                src="/qr-frame.svg"
-                alt="Qr Frame"
-                width={265}
-                height={265}
-              />
-            </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Easily add your Untis Login</CardTitle>
+        <CardDescription>
+          Scan your QR Code from your Untis Account
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="w-full max-w-[430px]">
+          <video ref={videoRef}></video>
+          <div className="left-0 w-full" ref={qrBoxRef}>
+            <img
+              className="absolute top-1/2 left-1/2 fill-none"
+              style={{
+                transform: "translate(-50%, -50%)",
+              }}
+              src="/qr-frame.svg"
+              alt="Qr Frame"
+              width={265}
+              height={265}
+            />
           </div>
-        </CardContent>
-        <CardFooter>{result && <p>Scanned Result: {result}</p>}</CardFooter>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+      <CardFooter>{result && <p>Scanned Result: {result}</p>}</CardFooter>
+    </Card>
   );
 }
