@@ -11,8 +11,28 @@ import {
   MUTATIONS,
 } from "@/db/queries";
 import { Result, err, ok } from "neverthrow";
+import { getUntis } from "@/lib/untis";
+
+export async function getClasses(school: string, domain: string) {
+  await stackServerApp.getUser({ or: "redirect" });
+  const untis = getUntis({
+    url: domain,
+    school,
+    timezone: "Europe/Berlin",
+    auth: {
+      type: "public",
+    },
+  });
+  const session = await untis.login();
+  if (session.isErr()) return;
+  const classes = await untis.getClassesForCurrentSchoolYear(session.value);
+  if (classes.isErr()) return;
+  await untis.logout(session.value);
+  return classes.value;
+}
 
 export async function createAccess(values: typeof formSchema.infer) {
+  await stackServerApp.getUser({ or: "redirect" });
   const validatedValues = formSchema(values);
   if (validatedValues instanceof type.errors)
     return { error: validatedValues.summary };
