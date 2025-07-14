@@ -1,16 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Calendar,
-  Clock,
-  Laptop,
-  Smartphone,
-  RefreshCw,
-  Github,
-} from "lucide-react";
-
+import { ArrowRight, Calendar, Clock, RefreshCw, Github } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuList,
