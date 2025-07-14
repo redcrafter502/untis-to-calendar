@@ -10,7 +10,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <div className="flex items-center justify-between border-b-2 border-gray-500 p-4">
+      <div className="bg-background sticky top-0 z-40 flex w-full items-center justify-between border-b p-4">
         <div>
           <Button variant="ghost">
             <Link href="/" className="text-xl">
