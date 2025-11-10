@@ -497,8 +497,8 @@ function convertUntisDateToDate(
     });
 
     const dateStringInTimezone = formatter.format(dateInTimezone);
-    console.log(dateStringInTimezone);
-    console.log(new Date(dateStringInTimezone));
+    console.log("Date String in Timezone:", dateStringInTimezone);
+    console.log("Date object", new Date(dateStringInTimezone));
     return ok(new Date(dateStringInTimezone));
   } catch (error) {
     return err(error as Error);
