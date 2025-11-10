@@ -30,6 +30,7 @@ export async function GET(
     }
     getExamCalEvents(exams.value).forEach((event) => {
       if (!event) return;
+      console.log("Event 1", event);
       calendar.createEvent(event);
     });
   }
@@ -46,6 +47,7 @@ export async function GET(
   }
   getLessonCalEvents(lessons.value).forEach((event) => {
     if (!event) return;
+    console.log("Event 2", event);
     calendar.createEvent(event);
   });
 
