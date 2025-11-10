@@ -454,7 +454,11 @@ function convertUntisDateToDate(
   untisDate: number,
   untisTime: number,
 ): Result<Date, Error> {
+  console.log("Untis Date:", untisDate);
+
   const dateString = String(untisDate);
+
+  console.log("Date String:", dateString);
 
   if (dateString.length !== 8) {
     return err(
@@ -497,6 +501,7 @@ function convertUntisDateToDate(
     });
 
     const dateStringInTimezone = formatter.format(dateInTimezone);
+    console.log("Timezone:", timezone);
     console.log("Date String in Timezone:", dateStringInTimezone);
     console.log("Date object", new Date(dateStringInTimezone));
     return ok(new Date(dateStringInTimezone));
