@@ -454,6 +454,7 @@ function convertUntisDateToDate(
   untisDate: number,
   untisTime: number,
 ): Result<Date, Error> {
+  console.log("===== New Below ======");
   console.log("Untis Date:", untisDate);
 
   const dateString = String(untisDate);
