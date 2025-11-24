@@ -491,11 +491,7 @@ function convertUntisDateToDate(
   }
 
   try {
-    // Create a Temporal.ZonedDateTime from the calendar fields in the given time zone.
-    // Temporal will interpret these fields as wall-clock time in `timezone`.
-    // If the local time is ambiguous or invalid due to DST, you can pass an options
-    // object with `disambiguation` ("compatible" | "earlier" | "later" | "reject")
-    const zdt = Temporal.ZonedDateTime.from({
+    const zonedDateTime = Temporal.ZonedDateTime.from({
       year,
       month,
       day,
@@ -506,76 +502,11 @@ function convertUntisDateToDate(
       timeZone: timezone,
       calendar: "iso8601",
     });
-
-    // Convert the ZonedDateTime to an Instant, then to a JS Date
-    const instant = zdt.toInstant();
+    const instant = zonedDateTime.toInstant();
     const jsDate = new Date(Number(instant.epochMilliseconds));
 
     return ok(jsDate);
   } catch (e) {
-    // Temporal throws on invalid zone, invalid date (e.g. month 13), or other errors.
     return err(e instanceof Error ? e : new Error(String(e)));
   }
 }
-
-/*function convertUntisDateToDate(
-  timezone: string,
-  untisDate: number,
-  untisTime: number,
-): Result<Date, Error> {
-  console.log("===== New Below ======");
-  console.log("Untis Date:", untisDate);
-
-  const dateString = String(untisDate);
-
-  console.log("Date String:", dateString);
-
-  if (dateString.length !== 8) {
-    return err(
-      new Error("Invalid date format. Date must be in YYYYMMDD format."),
-    );
-  }
-
-  const year = parseInt(dateString.slice(0, 4));
-  const month = parseInt(dateString.slice(4, 6)) - 1;
-  const day = parseInt(dateString.slice(6, 8));
-
-  let hour = 0;
-  let minute = 0;
-
-  const timeString = String(untisTime).padStart(4, "0");
-
-  if (timeString.length === 4) {
-    hour = parseInt(timeString.slice(0, 2));
-    minute = parseInt(timeString.slice(2, 4));
-
-    if (isNaN(hour) || isNaN(minute)) {
-      return err(new Error("Invalid time value."));
-    }
-  }
-
-  try {
-    // Create a Date object in the specified timezone
-    const dateInTimezone = new Date(year, month, day, hour, minute);
-
-    // Use toLocaleString to ensure the Date object is interpreted in the specified timezone.
-    const formatter = new Intl.DateTimeFormat("en-US", {
-      timeZone: timezone,
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      timeZoneName: "short",
-    });
-
-    const dateStringInTimezone = formatter.format(dateInTimezone);
-    console.log("Timezone:", timezone);
-    console.log("Date String in Timezone:", dateStringInTimezone);
-    console.log("Date object", new Date(dateStringInTimezone));
-    return ok(new Date(dateStringInTimezone));
-  } catch (error) {
-    return err(error as Error);
-  }
-}*/
