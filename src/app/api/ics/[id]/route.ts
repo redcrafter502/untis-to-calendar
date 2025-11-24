@@ -13,7 +13,7 @@ export async function GET(
   const untis = getUntis({
     url: data.value.domain,
     school: data.value.school,
-    timezone: "Europe/Berlin",
+    timezone: data.value.timezone,
     auth: getAuth(data.value),
   });
   const session = await untis.login();
