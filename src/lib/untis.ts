@@ -3,6 +3,7 @@ import { type } from "arktype";
 import { ok, err, Result } from "neverthrow";
 import { authenticator as Authenticator } from "otplib";
 import { tryCatch } from "./try-catch";
+import { Temporal } from "@js-temporal/polyfill";
 
 type GetUntisProps = {
   url: string;
@@ -454,6 +455,74 @@ function convertUntisDateToDate(
   untisDate: number,
   untisTime: number,
 ): Result<Date, Error> {
+  // Validate date format YYYYMMDD
+  const dateString = String(untisDate);
+  if (dateString.length !== 8) {
+    return err(
+      new Error("Invalid date format. Date must be in YYYYMMDD format."),
+    );
+  }
+
+  const year = Number(dateString.slice(0, 4));
+  const month = Number(dateString.slice(4, 6));
+  const day = Number(dateString.slice(6, 8));
+
+  if ([year, month, day].some((v) => Number.isNaN(v))) {
+    return err(new Error("Invalid numeric date components."));
+  }
+
+  // Validate time (HHMM). If untisTime is omitted/0, it means 00:00
+  const timeString = String(untisTime ?? 0).padStart(4, "0");
+  if (timeString.length !== 4) {
+    return err(new Error("Invalid time format. Time must be HHMM (0-2359)."));
+  }
+
+  const hour = Number(timeString.slice(0, 2));
+  const minute = Number(timeString.slice(2, 4));
+  if (
+    Number.isNaN(hour) ||
+    Number.isNaN(minute) ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    return err(new Error("Invalid time components."));
+  }
+
+  try {
+    // Create a Temporal.ZonedDateTime from the calendar fields in the given time zone.
+    // Temporal will interpret these fields as wall-clock time in `timezone`.
+    // If the local time is ambiguous or invalid due to DST, you can pass an options
+    // object with `disambiguation` ("compatible" | "earlier" | "later" | "reject")
+    const zdt = Temporal.ZonedDateTime.from({
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      second: 0,
+      millisecond: 0,
+      timeZone: timezone,
+      calendar: "iso8601",
+    });
+
+    // Convert the ZonedDateTime to an Instant, then to a JS Date
+    const instant = zdt.toInstant();
+    const jsDate = new Date(Number(instant.epochMilliseconds));
+
+    return ok(jsDate);
+  } catch (e) {
+    // Temporal throws on invalid zone, invalid date (e.g. month 13), or other errors.
+    return err(e instanceof Error ? e : new Error(String(e)));
+  }
+}
+
+/*function convertUntisDateToDate(
+  timezone: string,
+  untisDate: number,
+  untisTime: number,
+): Result<Date, Error> {
   console.log("===== New Below ======");
   console.log("Untis Date:", untisDate);
 
@@ -509,4 +578,4 @@ function convertUntisDateToDate(
   } catch (error) {
     return err(error as Error);
   }
-}
+}*/
