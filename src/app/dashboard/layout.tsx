@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { UserButton } from "@stackframe/stack";
+import { UserButtonWrapper } from "./client.layout";
 import Link from "next/link";
-import { Suspense } from "react";
 
 export default function DashboardLayout({
   children,
@@ -23,9 +22,7 @@ export default function DashboardLayout({
             </Link>
           </Button>
         </div>
-        <Suspense fallback={<div>Loading...</div>}>
-          <UserButton />
-        </Suspense>
+        <UserButtonWrapper />
       </div>
       {children}
     </div>
