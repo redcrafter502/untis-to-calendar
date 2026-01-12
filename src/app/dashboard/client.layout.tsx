@@ -2,6 +2,7 @@
 
 import { UserButton } from "@stackframe/stack";
 import { TrashIcon } from "lucide-react";
+import { deleteAccountServerFunction } from "./server";
 
 export function UserButtonWrapper() {
   return (
@@ -22,5 +23,5 @@ function deleteAccount() {
     "Are you sure you want to permanently delete your account and all associated data? This action cannot be undone.",
   );
   if (!confirmDelete) return;
-  console.log("Delete Account");
+  deleteAccountServerFunction();
 }
