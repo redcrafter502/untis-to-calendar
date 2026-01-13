@@ -6,9 +6,12 @@ import { stackServerApp } from "@/stack";
 export async function deleteAccountAction() {
   const user = await stackServerApp.getUser({ or: "redirect" });
   const accesses = (user.serverMetadata?.accesses ?? []) as string[];
-  console.log(accesses);
-  accesses.map((access) => {
-    MUTATIONS.deleteAccess(access);
-  });
-  user.delete();
+  const results = await Promise.all(
+    accesses.map((access) => MUTATIONS.deleteAccess(access)),
+  );
+  const failed = results.filter((result) => result.isErr());
+  if (failed.length > 0) {
+    throw new Error(`Failed to delete ${failed.length} access record(s)`);
+  }
+  await user.delete();
 }
