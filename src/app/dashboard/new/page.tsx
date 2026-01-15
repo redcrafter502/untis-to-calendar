@@ -27,7 +27,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, Loader2Icon } from "lucide-react";
 
 const defaultTimezone = "Europe/Berlin";
 
@@ -343,7 +343,16 @@ function CreateForm({
             )}
           />
         )}
-        <Button type="submit">Create</Button>
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? (
+            <>
+              <Loader2Icon className="animate-spin" />
+              Creating...
+            </>
+          ) : (
+            "Create"
+          )}
+        </Button>
       </form>
     </Form>
   );
