@@ -26,6 +26,8 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircleIcon } from "lucide-react";
 
 const defaultTimezone = "Europe/Berlin";
 
@@ -285,6 +287,16 @@ function CreateForm({
               </FormItem>
             )}
           />
+        )}
+        {(authType === "secret" || authType === "password") && (
+          <Alert variant="warning">
+            <AlertCircleIcon />
+            <AlertTitle>Privacy Warning</AlertTitle>
+            <AlertDescription>
+              Please make sure that you trust this untis instance before sharing
+              your credentials.
+            </AlertDescription>
+          </Alert>
         )}
         {authType === "public" && !classes && (
           <Button
