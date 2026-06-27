@@ -88,7 +88,7 @@ export function QrReader({ onResult }: { onResult: (result: string) => void }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="w-full max-w-[430px]">
+        <div className="w-full max-w-107.5">
           <video ref={videoRef}></video>
           <div className="left-0 w-full" ref={qrBoxRef}>
             <img
@@ -104,7 +104,7 @@ export function QrReader({ onResult }: { onResult: (result: string) => void }) {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="w-full max-w-[430px]">
+      <CardFooter className="w-full max-w-107.5">
         <Select
           value={preferredCamera ?? "null"}
           onValueChange={setPreferredCamera}

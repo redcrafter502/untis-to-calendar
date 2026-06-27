@@ -96,7 +96,7 @@ function TopSection() {
               <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                 Sync Your Untis Timetable to Any Calendar
               </h1>
-              <p className="text-muted-foreground max-w-[600px] md:text-xl">
+              <p className="text-muted-foreground max-w-150 md:text-xl">
                 Never miss a class again. Automatically sync your Untis school
                 timetable to your calendar app of choice, eg. Google Calendar,
                 Apple Calendar, Thunderbird, Outlook, and more.
@@ -114,7 +114,7 @@ function TopSection() {
             </div>
           </div>
           <div className="flex items-center justify-center">
-            <div className="relative h-[350px] w-[350px] sm:h-[400px] sm:w-[400px] lg:h-[450px] lg:w-[450px]">
+            <div className="relative h-87.5 w-87.5 sm:h-100 sm:w-100 lg:h-112.5 lg:w-112.5">
               <Image
                 src="/logo.webp"
                 alt="Untis to Calendar App"
@@ -142,7 +142,7 @@ function FeaturesSection() {
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
               Key Features
             </h2>
-            <p className="text-muted-foreground max-w-[900px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            <p className="text-muted-foreground max-w-225 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               Everything you need to integrate your timetable into your
               organizational system
             </p>
@@ -191,7 +191,7 @@ function HowItWorksSection() {
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
               How It Works
             </h2>
-            <p className="text-muted-foreground max-w-[900px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            <p className="text-muted-foreground max-w-225 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               Three simple steps to sync your Untis timetable with your calendar
             </p>
           </div>
@@ -222,7 +222,7 @@ function HowItWorksSection() {
             </div>
             <h3 className="text-xl font-bold">Enjoy Automatic Syncing</h3>
             <p className="text-muted-foreground text-center">
-              That's it! Your timetable will now stay in sync automatically
+              {"That's it! Your timetable will now stay in sync automatically"}
             </p>
           </div>
         </div>
@@ -250,7 +250,7 @@ function PlatformSections() {
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
               Supported Platforms
             </h2>
-            <p className="text-muted-foreground max-w-[900px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            <p className="text-muted-foreground max-w-225 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               Works seamlessly with your favorite calendar applications on your
               favorite devices
             </p>
@@ -277,7 +277,7 @@ function BottomSection() {
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
               Ready to Simplify Your Schedule?
             </h2>
-            <p className="text-muted-foreground max-w-[600px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            <p className="text-muted-foreground max-w-150 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
               Synchronize your timetable to your calendar app now
             </p>
           </div>
