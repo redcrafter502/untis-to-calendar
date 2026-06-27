@@ -239,9 +239,9 @@ export function getUntis({ url, school, timezone, auth }: GetUntisProps) {
         session.untis.getOwnTimetableForRange(date, date),
       );
       if (dayTimetable.isOk()) {
-        const validatedDayTimetable = LessonType(dayTimetable.value);
+        const validatedDayTimetable = LessonsType(dayTimetable.value);
         if (!(validatedDayTimetable instanceof type.errors))
-          returnTimetable.push(validatedDayTimetable);
+          returnTimetable.push(...validatedDayTimetable);
       }
     }
     return ok(returnTimetable);
